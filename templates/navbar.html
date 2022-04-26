@@ -1,0 +1,72 @@
+<!-- Navbar-->
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-white">
+    <div class="container-fluid justify-content-between">
+        <!-- Left elements -->
+        <div class="d-flex">
+            <!-- Brand -->
+            <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
+                <img
+                        src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp"
+                        height="20"
+                        alt="MDB Logo"
+                        loading="lazy"
+                        style="margin-top: 2px;"
+                />
+            </a>
+        </div>
+        <!-- Left elements -->
+
+        <!-- Search form -->
+        <form class="input-group w-auto my-auto d-none d-sm-flex">
+            <input
+                    autocomplete="off"
+                    type="search"
+                    class="form-control rounded"
+                    placeholder="Search"
+                    style="min-width: 550px;"
+            />
+            <span class="input-group-text border-0 d-none d-lg-flex">
+                <i class="fas fa-search"></i>
+            </span>
+        </form>
+
+        <!-- Right elements -->
+        <div class="navbar-nav flex-row">
+            <!-- Avatar -->
+            <div class="dropdown">
+                <a
+                        class="dropdown-toggle d-flex align-items-center hidden-arrow"
+                        href="#"
+                        id="navbarDropdownMenuAvatar"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                >
+                    <img
+                            src="{{ 'mlym8565@gmail.com' | gravatar }}"
+                            class="rounded-circle"
+                            height="25"
+                            alt="Black and White Portrait of a Man"
+                            loading="lazy"
+                    />
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end"
+                    aria-labelledby="navbarDropdownMenuAvatar"
+                >
+                    <li>
+                        <a class="dropdown-item" href="#">My profile</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">Settings</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">Logout</a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <!-- Right elements -->
+    </div>
+</nav>
+<!-- Navbar -->

@@ -1,0 +1,60 @@
+{% for post in posts.items %}
+    {% if loop.last %}
+        {% if posts.has_next %}
+            {% set get_url = url_for('index', page=posts.next_num) %}
+        {% else %}
+            {% set get_url = url_for('index', page=0) %}
+        {% endif %}
+        <div class="row"
+             hx-get="{{ get_url }}"
+             hx-trigger="revealed"
+             hx-swap="afterend"
+        >
+    {% else %}
+        <div class="row">
+    {% endif %}
+    <div class="col-md-12 grid-margin">
+        <div class="card rounded">
+            <div class="card-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img class="img-xs rounded-circle"
+                             src="{{ post.author | gravatar }}" alt="">
+                        <div class="ms-2 d-flex">
+                            <p>{{ post.author}}</p>
+                            <p class="tx-11 ms-2 text-muted">{{ random_minutes[loop.index] }} min ago</p>
+                        </div>
+
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn p-0" type="button" id="dropdownMenuButton2"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 class="feather feather-more-horizontal icon-lg pb-3px">
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="19" cy="12" r="1"></circle>
+                                <circle cx="5" cy="12" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4 class="mb-3">{{ post.content }}</h4>
+{#                <p class="mb-3 tx-14"></p>#}
+            </div>
+            <div class="card-footer">
+            </div>
+        </div>
+    </div>
+    </div>
+{% endfor %}
+{% if not posts %}
+    <div class="row">
+        <p class="text-center tx-11 text-muted">Out of post.</p>
+    </div>
+{% endif %}
