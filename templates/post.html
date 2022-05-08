@@ -88,14 +88,14 @@
                                     </li>
                                     <li>
                                         <a type="button"
-                                           href="{{ url_for('login') }}"
+                                           href="#comments"
                                            class="fa-regular fa-comment fa-xl text-dark text-decoration-none"
                                         ></a>
                                         <span class="mt-3 p-2">{{ post.comments.count() }}</span>
                                     </li>
                                     <li>
                                         <a type="button"
-                                           href="{{ url_for('login') }}"
+                                           href=""
                                            class="fa-solid fa-link fa-xl text-dark text-decoration-none"
                                         ></a>
                                     </li>
@@ -110,9 +110,16 @@
                                       novalidate>
                                     {{ form.hidden_tag() }}
                                     <div class="d-flex">
-                                        <img src="{{ current_user.email | gravatar }}"
+                                        {% if current_user.is_authenticated %}
+                                            <img src="{{ current_user.email | gravatar }}"
                                              class="border img-xs rounded-circle m-2"
                                              alt="{{ current_user.name }}">
+                                        {% else %}
+                                            <img src="{{ "anonymous" | gravatar }}"
+                                             class="border img-xs rounded-circle m-2"
+                                             alt="anonymous">
+                                        {% endif %}
+
                                         <div class="form-outline w-100 me-4">
                                             {% if form.content.errors %}
                                                 {{ form.content(class_='form-control is-invalid mb-0') }}

@@ -12,9 +12,9 @@
         <a class="navbar-brand me-2 mb-1 d-flex align-items-center fw-bold" href="{{ url_for('home') }}">
             Hi, I am
             {% if current_user.is_authenticated %}
-                <strong class="d-none d-sm-block ms-1 text-black">{{ current_user.name }}</strong>
+                <span class="d-none d-sm-block ms-1 text-black">{{ current_user.name }}</span>
             {% else %}
-                <strong class="d-none d-sm-block ms-1 text-black">...</strong>
+                <span class="d-none d-sm-block ms-1 text-black">...</span>
             {% endif %}
         </a>
 

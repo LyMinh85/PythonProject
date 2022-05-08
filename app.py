@@ -9,8 +9,6 @@ from flask_login import LoginManager, login_user, current_user, login_required, 
 from datetime import datetime
 from relative_date import display_time
 from flask_ckeditor import CKEditor
-import requests
-import random
 import os
 
 app = Flask(__name__)
@@ -29,7 +27,6 @@ gravatar = Gravatar(app,
                     use_ssl=False,
                     base_url=None)
 
-csrf = CSRFProtect(app)
 boostrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
