@@ -16,8 +16,7 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -36,7 +35,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 ckeditor = CKEditor(app)
 # My module
-from models import Post, User, Comment
+from models import Post, User, Comment, LikedComment, LikedPost
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
 
 
