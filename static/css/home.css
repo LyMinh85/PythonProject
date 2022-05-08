@@ -1,6 +1,5 @@
 body {
     background-color: #f9fafb;
-    margin-top: 100px;
 }
 
 .img-xs {
@@ -63,4 +62,17 @@ img {
     background-clip: border-box;
     border: 1px solid #f2f4f9;
     border-radius: 0.25rem;
+}
+
+#list-post .card-body a {
+    color: black;
+}
+
+#list-post .card-body a:hover {
+    color: #0d6efd;
+}
+
+.card-body img {
+    width: 100% !important;
+    height: auto !important;
 }

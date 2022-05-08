@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_form %}
+
+
+{% block content %}
+    <form action="{{ url_for('new_post') }}" class="p-5 m-5" method="post">
+        {{ form.hidden_tag() }}
+        {{ render_form(form, novalidate=True) }}
+    </form>
+{% endblock %}
+
+{% block script %}
+    {{ ckeditor.load() }}
+    {{ ckeditor.config(name='content') }}
+{% endblock %}

@@ -1,25 +1,39 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <style>
+        body {
+            margin-top: 100px;
+        }
+    </style>
+{% endblock %}
+
 {% block navbar %}
     {% include "navbar.html" %}
 {% endblock %}
 
 
 {% block content %}
-<div class="container">
-    <div class="profile-page tx-13">
+    <div class="container-md">
+        <div class="profile-page tx-13">
 
-        <div class="row profile-body justify-content-md-center">
-            <!-- middle wrapper start -->
-            <div class="col-md-8 col-xl-6 middle-wrapper">
+            <div class="row profile-body justify-content-md-center">
+                <!-- middle wrapper start -->
+                <div id="list-post" class="col-md-8 col-xl-6 middle-wrapper">
 
-                <div hx-get="{{ url_for('index', page=1) }}"
-                     hx-trigger="revealed"
-                     hx-swap="afterend"></div>
+                    <div hx-get="{{ url_for('index', page=1) }}"
+                         hx-trigger="revealed"
+                         hx-swap="afterend"></div>
 
+                </div>
+                <!-- middle wrapper end -->
             </div>
-            <!-- middle wrapper end -->
         </div>
     </div>
-</div>
+
+    <script src="/static/js/heartAnimation.js"></script>
+    <script>
+        animateHeart('list-post', 'like_post');
+    </script>
+
 {% endblock %}
