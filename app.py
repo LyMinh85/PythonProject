@@ -15,7 +15,10 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///post.db'
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
+if DATABASE_URL.startswith("postgres://"):
+    uri = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 gravatar = Gravatar(app,
