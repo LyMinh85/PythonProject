@@ -13,10 +13,12 @@ def to_date_obj(date_time_str):
     return datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
 
 
-def display_time(from_date, today=datetime.now(), granularity=1):
+def display_time(from_date, granularity=1):
     result = []
-    seconds = int((today - from_date).total_seconds())
-    if seconds < 0:
+    now = datetime.now()
+    seconds = int((now - from_date).total_seconds())
+    print(seconds)
+    if seconds < -59:
         return 'Just now'
     for name, count in intervals:
         value = seconds // count
