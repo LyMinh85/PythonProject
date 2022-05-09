@@ -18,7 +18,8 @@
                         <div class="card-header p-2">
                             <ul class="list-unstyled d-flex mb-0 pe-xl-5">
                                 <li>
-                                    <a onclick="window.history.back(); return false;" class="btn btn-link btn-rounded text-dark">
+                                    <a onclick="window.history.back(); return false;"
+                                       class="btn btn-link btn-rounded text-dark">
                                         <i class="fa-solid fa-arrow-left fa-lg"></i>
                                     </a>
                                 </li>
@@ -104,38 +105,40 @@
                         </div>
 
                         <div id="comments" class="text-dark card mt-2">
+                            <div id="comment" class="position-absolute" style="top: -145px;">
+
+                            </div>
                             <!-- Input -->
                             <div class="d-flex flex-column mt-3 mb-3">
-                                <form action="{{ url_for('send_comment', post_id=post.id) }}" method="post"
+                                <form hx-post="{{ url_for('send_comment', post_id=post.id) }}"
+                                      hx-target="#comments"
+                                      hx-swap="innerHTML"
                                       novalidate>
                                     {{ form.hidden_tag() }}
                                     <div class="d-flex">
                                         {% if current_user.is_authenticated %}
                                             <img src="{{ current_user.email | gravatar }}"
-                                             class="border img-xs rounded-circle m-2"
-                                             alt="{{ current_user.name }}">
+                                                 class="border img-xs rounded-circle m-2"
+                                                 alt="{{ current_user.name }}">
                                         {% else %}
                                             <img src="{{ "anonymous" | gravatar }}"
-                                             class="border img-xs rounded-circle m-2"
-                                             alt="anonymous">
+                                                 class="border img-xs rounded-circle m-2"
+                                                 alt="anonymous">
                                         {% endif %}
 
                                         <div class="form-outline w-100 me-4">
-                                            {% if form.content.errors %}
-                                                {{ form.content(class_='form-control is-invalid mb-0') }}
-                                                {{ form.content.label(class_='form-label') }}
-                                                <div class="invalid-feedback mt-1">
-                                                    {{ form.content.errors[0] }}
-                                                </div>
-                                            {% else %}
-                                                {{ form.content(class_='form-control') }}
-                                                {{ form.content.label(class_='form-label') }}
-                                            {% endif %}
+                                            {{ form.content(class_='form-control', autocomplete="off") }}
+                                            {{ form.content.label(class_='form-label') }}
                                         </div>
                                     </div>
 
                                     <div class="d-flex flex-row-reverse mt-2 me-4">
-                                        {{ form.submit(class_='btn btn-primary btn-rounded') }}
+                                        {% if current_user.is_authenticated %}
+                                            {{ form.submit(class_='btn btn-primary btn-rounded') }}
+                                        {% else %}
+                                            <a class="btn btn-primary btn-rounded"
+                                               href="{{ url_for('login') }}">Send</a>
+                                        {% endif %}
                                     </div>
                                 </form>
                             </div>
@@ -157,19 +160,17 @@
                                             <ul class="list-unstyled d-flex mb-0 pe-xl-5">
                                                 <li>
                                                     {% if current_user.is_authenticated %}
-                                                        {% if current_user.has_liked_comment(comment.id) %}
-                                                            <a type="button"
-                                                               hx-get="{{ url_for('like_comment', id=comment.id, action='unliked') }}"
-                                                               class="fa-solid fa-heart fa-lg text-dark text-decoration-none"
+                                                        <a type="button"
+                                                           hx-get="{{ url_for('like_comment', id=comment.id) }}"
+                                                           data-id='{{ comment.id }}'
+                                                           {% if current_user.has_liked_comment(comment.id) %}
+                                                               class="fa-solid fa-heart fa-xl text-dark text-decoration-none"
                                                                data-action="unliked"
-                                                            ></a>
-                                                        {% else %}
-                                                            <a type="button"
-                                                               hx-get="{{ url_for('like_comment', id=comment.id, action='like') }}"
-                                                               class="fa-regular fa-heart fa-lg text-dark text-decoration-none"
+                                                           {% else %}
+                                                               class="fa-regular fa-heart fa-xl text-dark text-decoration-none"
                                                                data-action="like"
-                                                            ></a>
-                                                        {% endif %}
+                                                           {% endif %}
+                                                        ></a>
                                                     {% else %}
                                                         <a type="button"
                                                            href="{{ url_for('login') }}"
@@ -204,9 +205,9 @@
 {% endblock %}
 
 {% block script %}
-    <script src="/static/js/heartAnimation.js"></script>
+    <script src="/static/js/myScript.js"></script>
     <script>
-        animateHeart('post', 'like_post');
-        animateHeart('comments', 'like_comment');
+        animateHeart('post');
+        animateHeart('comments');
     </script>
 {% endblock %}

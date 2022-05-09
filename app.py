@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
 DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///post.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 gravatar = Gravatar(app,
@@ -61,12 +61,11 @@ def index():
 @login_required
 def like_post():
     post_id = int(request.args.get('id'))
-    action = request.args.get('action')
-    if action == 'like':
-        current_user.like_post(post_id)
-        db.session.commit()
-    if action == 'unliked':
+    if current_user.has_liked_post(post_id):
         current_user.unlike_post(post_id)
+        db.session.commit()
+    else:
+        current_user.like_post(post_id)
         db.session.commit()
     return ''
 
@@ -133,25 +132,26 @@ def get_post(post_id):
 @login_required
 def send_comment(post_id):
     form = CommentForm()
+    post = Post.query.get(post_id)
     if form.validate_on_submit():
         now = datetime.now()
         new_comment = Comment(date=now, content=form.content.data, user_id=current_user.id, post_id=post_id)
         db.session.add(new_comment)
         db.session.commit()
-        return redirect(url_for('get_post', post_id=post_id))
-    return redirect(url_for('get_post', post_id=post_id))
+        form.content.data = ""
+        return render_template('send-comment.html', form=form, post=post, display_time=display_time)
+    return render_template('send-comment.html', form=form, post=post, display_time=display_time)
 
 
 @app.route('/like-comment', methods=["GET"])
 @login_required
 def like_comment():
     comment_id = int(request.args.get('id'))
-    action = request.args.get('action')
-    if action == 'like':
-        current_user.like_comment(comment_id)
-        db.session.commit()
-    if action == 'unliked':
+    if current_user.has_liked_comment(comment_id):
         current_user.unlike_comment(comment_id)
+        db.session.commit()
+    else:
+        current_user.like_comment(comment_id)
         db.session.commit()
     return ''
 

@@ -30,15 +30,13 @@ class User(UserMixin, db.Model):
     liked_comments = db.relationship('LikedComment', back_populates='user', lazy='dynamic')
 
     def like_post(self, post_id):
-        if not self.has_liked_post(post_id):
-            like = LikedPost(user_id=self.id, post_id=post_id)
-            db.session.add(like)
+        like = LikedPost(user_id=self.id, post_id=post_id)
+        db.session.add(like)
 
     def unlike_post(self, post_id):
-        if self.has_liked_post(post_id):
-            LikedPost.query.filter_by(
-                user_id=self.id,
-                post_id=post_id).delete()
+        LikedPost.query.filter_by(
+            user_id=self.id,
+            post_id=post_id).delete()
 
     def has_liked_post(self, post_id):
         return LikedPost.query.filter(
@@ -46,15 +44,13 @@ class User(UserMixin, db.Model):
             LikedPost.post_id == post_id).count() > 0
 
     def like_comment(self, comment_id):
-        if not self.has_liked_comment(comment_id):
-            like = LikedComment(user_id=self.id, comment_id=comment_id)
-            db.session.add(like)
+        like = LikedComment(user_id=self.id, comment_id=comment_id)
+        db.session.add(like)
 
     def unlike_comment(self, comment_id):
-        if self.has_liked_post(comment_id):
-            LikedComment.query.filter_by(
-                user_id=self.id,
-                comment_id=comment_id).delete()
+        LikedComment.query.filter_by(
+            user_id=self.id,
+            comment_id=comment_id).delete()
 
     def has_liked_comment(self, comment_id):
         return LikedComment.query.filter(

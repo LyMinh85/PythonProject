@@ -9,16 +9,11 @@ intervals = (
 )
 
 
-def to_date_obj(date_time_str):
-    return datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
-
-
 def display_time(from_date, granularity=1):
     result = []
     now = datetime.now()
     seconds = int((now - from_date).total_seconds())
-    print(seconds)
-    if seconds < -59:
+    if seconds <= 0:
         return 'Just now'
     for name, count in intervals:
         value = seconds // count
