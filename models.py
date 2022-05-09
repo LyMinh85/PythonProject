@@ -16,7 +16,7 @@ class Post(db.Model):
     post_likes = db.relationship('LikedPost', back_populates='post', lazy='dynamic')
 
 
-class User(db.Model, UserMixin):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
