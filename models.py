@@ -24,10 +24,10 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
 
-    posts = db.relationship("Post")
-    comments = db.relationship("Comment")
-    liked_posts = db.relationship('LikedPost')
-    liked_comment = db.relationship('LikedComment')
+    posts = db.relationship("Post", back_populates='user', lazy='dynamic')
+    comments = db.relationship("Comment", back_populates='user', lazy='dynamic')
+    liked_posts = db.relationship('LikedPost', back_populates='user', lazy='dynamic')
+    liked_comments = db.relationship('LikedComment', back_populates='user', lazy='dynamic')
 
     def like_post(self, post_id):
         if not self.has_liked_post(post_id):
@@ -94,6 +94,6 @@ class LikedComment(db.Model):
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
-    comment = db.relationship('Comment')
-    user = db.relationship('User')
+    comment = db.relationship('Comment', back_populates='likes')
+    user = db.relationship('User', back_populates='liked_comments')
 

@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_gravatar import Gravatar
-from flask_wtf.csrf import CSRFProtect
 from flask_bootstrap import Bootstrap5
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -91,7 +90,7 @@ def new_post():
 def sign_up():
     form = SignUpForm()
     if form.validate_on_submit():
-        salt = generate_password_hash(form.password.data, 'pbkdf2:sha256')
+        salt = generate_password_hash(form.password.data, 'pbkdf2:sha256', salt_length=8)
         new_user = User(name=form.name.data, email=form.email.data, password=salt)
         db.session.add(new_user)
         db.session.commit()
@@ -155,6 +154,7 @@ def like_comment():
         current_user.unlike_comment(comment_id)
         db.session.commit()
     return ''
+
 
 if __name__ == '__main__':
     app.run(debug=True)
