@@ -39,6 +39,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end"
                     aria-labelledby="navbarDropdownMenuAvatar"
+                    style="left: 0;"
                 >
                     <li>
                         <a class="dropdown-item" href="#">My profile</a>
@@ -57,21 +58,21 @@
     <!-- Left elements -->
 
     <!-- Search form -->
-    <form class="input-group w-auto my-auto d-none d-sm-flex">
-        <input
-                autocomplete="off"
-                type="search"
-                class="form-control rounded"
-                placeholder="Search"
-                style="min-width: 400px;"
-        />
-        <span class="input-group-text border-0 d-none d-lg-flex">
-                <i class="fas fa-search"></i>
-            </span>
-    </form>
+{#    <form class="input-group w-auto my-auto d-none d-sm-flex">#}
+{#        <input#}
+{#                autocomplete="off"#}
+{#                type="search"#}
+{#                class="form-control rounded"#}
+{#                placeholder="Search"#}
+{#                style="min-width: 400px;"#}
+{#        />#}
+{#        <span class="input-group-text border-0 d-none d-lg-flex">#}
+{#                <i class="fas fa-search"></i>#}
+{#            </span>#}
+{#    </form>#}
 
     <!-- Right elements -->
-    <div class="navbar-nav flex-row">
+    <div class="navbar-nav flex-row fs-5">
 
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('new_post') }}" class="text-reset me-3">

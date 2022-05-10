@@ -1,9 +1,9 @@
 {% for post in posts.items %}
     {% if loop.last %}
         {% if posts.has_next %}
-            {% set get_url = url_for('index', page=posts.next_num) %}
+            {% set get_url = url_for('get_all_posts', page=posts.next_num) %}
         {% else %}
-            {% set get_url = url_for('index', page=0) %}
+            {% set get_url = url_for('get_all_posts', page=0) %}
         {% endif %}
         <div class="row"
              hx-get="{{ get_url }}"

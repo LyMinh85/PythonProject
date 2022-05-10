@@ -1,6 +1,6 @@
-// parentNodeId: string. Example: "list-post"
-function animateHeart(parentNodeId) {
-    document.getElementById(parentNodeId).addEventListener('click', function (event) {
+// idParentNode: string. Example: "list-post"
+function animateHeart(idParentNode) {
+    document.getElementById(idParentNode).addEventListener('click', function (event) {
         let target = event.target; // where was the click?
         if (target.tagName !== 'A') return; // not on TD? Then we're not interested
         if (target.dataset.action !== 'like' && target.dataset.action !== 'unliked') return;
@@ -26,9 +26,9 @@ function animateHeart(parentNodeId) {
     });
 }
 
-// parentNodeId: string. Example: "list-post"
-function copyLinkToClipBoard(parentNodeId) {
-    document.getElementById(parentNodeId).addEventListener('click', function (event) {
+// idParentNode: string. Example: "list-post"
+function copyLinkToClipBoard(idParentNode) {
+    document.getElementById(idParentNode).addEventListener('click', function (event) {
         let target = event.target; // where was the click?
         if (target.tagName !== 'A') return;
         if (target.dataset.action !== 'copy-link') return;

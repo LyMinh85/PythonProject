@@ -1,41 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_gravatar import Gravatar
-from flask_bootstrap import Bootstrap5
+# Các thư viện
+from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+from flask_login import login_user, current_user, login_required, logout_user
 from datetime import datetime
+
+# Hàm hiển thị thời gian
 from relative_date import display_time
-from flask_ckeditor import CKEditor
-import os
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(12).hex()
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
-DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-gravatar = Gravatar(app,
-                    size=100,
-                    rating='g',
-                    default='retro',
-                    force_default=False,
-                    force_lower=False,
-                    use_ssl=False,
-                    base_url=None)
-
-boostrap = Bootstrap5(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
-ckeditor = CKEditor(app)
-# My module
+# Khởi tạo app
+from settings import app, db, login_manager
+# Các models của database
 from models import Post, User, Comment, LikedComment, LikedPost
+# Các Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
-
-
-db.create_all()
 
 
 @login_manager.user_loader
@@ -44,12 +21,18 @@ def load_user(user_id):
 
 
 @app.route('/')
-def home():  # put application's code here
+def home():
     return render_template("home.html")
 
 
-@app.route('/index')
-def index():
+@app.route('/get-all-posts')
+def get_all_posts():
+    """
+    Nếu hiển thị hết post (page == 0)
+        Hiển thị đã hết post
+    Sắp xếp giảm dần tất cả post. Phân trang mỗi trang 5 post \n
+    Trả về 5 post theo số page
+    """
     page = request.args.get('page', type=int)
     if page == 0:
         return render_template('post-card.html', posts=None, display_time=display_time, now=datetime.now())
@@ -60,6 +43,14 @@ def index():
 @app.route('/like-post', methods=["GET"])
 @login_required
 def like_post():
+    """
+    Để truy cập route này cần phải đăng nhập \n
+    Lấy id của post và id của người dùng hiện tại. \n
+    Nếu người dùng đã like post:
+        Bỏ like post
+    Ngược lại:
+        Like post
+    """
     post_id = int(request.args.get('id'))
     if current_user.has_liked_post(post_id):
         current_user.unlike_post(post_id)
@@ -73,6 +64,13 @@ def like_post():
 @app.route('/new-post', methods=['GET', "POST"])
 @login_required
 def new_post():
+    """
+    Method == GET:
+        Hiển thị form đăng post mới.
+    Method == POST:
+        Xác nhận form
+            Tạo obj Post mới rồi add vô database.
+    """
     form = NewPostForm()
     if form.validate_on_submit():
         today = datetime.now()
@@ -87,6 +85,13 @@ def new_post():
 
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
+    """
+    Method == GET:
+        Hiển thị form đăng ký.
+    Method == POST:
+        Xác nhận form, nếu thỏa thì tạo obj User mới rồi add vô database.
+        Đăng nhập user vừa tạo.
+    """
     form = SignUpForm()
     if form.validate_on_submit():
         salt = generate_password_hash(form.password.data, 'pbkdf2:sha256', salt_length=8)
@@ -100,6 +105,17 @@ def sign_up():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Method == GET:
+        Hiển thị form đăng nhập.
+    Method == POST:
+        Xác nhận form:
+            Tìm user có email vừa nhập trong database.
+                Nếu không tìm thấy, hiển thị lỗi và Hiển thị lại form đăng nhập.
+            Kiểm tra password:
+                Nếu sai cũng hiển thị lỗi và Hiển thị lại form đăng nhập.
+            Nếu tất cả đều thỏa thì đăng nhập người dùng.
+    """
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -117,12 +133,19 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    """
+    Đăng xuất người dùng hiện tại
+    """
     logout_user()
     return redirect(url_for('home'))
 
 
 @app.route("/post/<int:post_id>")
 def get_post(post_id):
+    """
+    :param post_id: id của post cần xem.
+    :return: render post.
+    """
     post = Post.query.get(post_id)
     form = CommentForm()
     return render_template('post.html', post=post, display_time=display_time, form=form)
@@ -131,6 +154,13 @@ def get_post(post_id):
 @app.route("/send-comment/<int:post_id>", methods=['POST'])
 @login_required
 def send_comment(post_id):
+    """
+    Nếu form đã xác nhận:
+        Tạo obj Comment mới rồi add vô database.
+        Reset lại form.content bằng chuỗi rỗng.
+    :param post_id: id của post cần comment.
+    :return: render phần comments
+    """
     form = CommentForm()
     post = Post.query.get(post_id)
     if form.validate_on_submit():
@@ -146,6 +176,14 @@ def send_comment(post_id):
 @app.route('/like-comment', methods=["GET"])
 @login_required
 def like_comment():
+    """
+        Để truy cập route này cần phải đăng nhập \n
+        Lấy id của comment và id của người dùng hiện tại. \n
+        Nếu người dùng đã like comment:
+            Bỏ like comment
+        Ngược lại:
+            Like comment
+    """
     comment_id = int(request.args.get('id'))
     if current_user.has_liked_comment(comment_id):
         current_user.unlike_comment(comment_id)
