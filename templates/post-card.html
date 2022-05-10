@@ -67,6 +67,8 @@
                     <a type="button"
                        href="javascript:"
                        class="fa-solid fa-link fa-xl text-dark text-decoration-none"
+                       data-bs-toggle="modal"
+                       data-bs-target="#copiedModal"
                        data-action="copy-link"
                        data-link="{{ url_for('get_post', post_id=post.id) }}"
                     ></a>
@@ -76,7 +78,6 @@
     </div>
 </div>
 </div>
-
 
 {% endfor %}
 {% if not posts %}

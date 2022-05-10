@@ -32,7 +32,7 @@ function copyLinkToClipBoard(idParentNode) {
         let target = event.target; // where was the click?
         if (target.tagName !== 'A') return;
         if (target.dataset.action !== 'copy-link') return;
-        let linkText =  `${window.location.href}${target.dataset.link}`;
+        let linkText =  `${document.location.origin}${target.dataset.link}`;
         navigator.clipboard.writeText(linkText).then(function () {
             console.log('Async: Copying to clipboard was successful!');
         }, function (err) {

@@ -77,3 +77,7 @@ img {
     height: auto !important;
 }
 
+.modal-dialog {
+    margin: 1.75rem auto;
+}
+
