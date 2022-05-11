@@ -9,7 +9,7 @@ from datetime import datetime
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
-from settings import app, db, login_manager, os, UPLOAD_FOLDER
+from settings import app, db, login_manager, os, UPLOAD_FOLDER, BASE_DIR
 # Các models của database
 from models import Post, User, Comment, LikedComment, LikedPost
 # Các Form
@@ -76,9 +76,9 @@ def new_post():
     if form.validate_on_submit():
         f = form.photo.data
         filename = secure_filename(f.filename)
-        file_path = app.root_path + app.config['UPLOAD_FOLDER'] + filename
+        file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
+        print(file_path)
         f.save(file_path)
-
         today = datetime.now()
         title = form.title.data
         content = form.content.data + f"<img src='{UPLOAD_FOLDER + filename}' />"
@@ -206,7 +206,7 @@ def delete_post(post_id):
     post_delete = Post.query.get(post_id)
     print(post_delete.content)
     image_link = post_delete.content.split("<img src='")[1].split("'")[0]
-    os.remove(app.root_path + image_link)
+    os.remove(os.path.join(BASE_DIR, image_link))
 
     if current_user.id != post_delete.user.id:
         return redirect(url_for('home'))

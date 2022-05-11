@@ -6,7 +6,8 @@ from flask_gravatar import Gravatar
 from flask_login import LoginManager
 import os
 
-UPLOAD_FOLDER = '\\static\\photos\\'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = 'static/photos/'
 
 
 app = Flask(__name__)
