@@ -25,26 +25,28 @@
                         <p class="tx-11 ms-2 mb-0 text-muted">{{ display_time(post.date) }}</p>
                     </div>
                 </div>
-                <div class="dropdown">
-                    <a
-                            class="text-reset me-3 dropdown-toggle hidden-arrow"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-mdb-toggle="dropdown"
-                            aria-expanded="false"
-                    >
-                        <i class="fa-solid fa-ellipsis"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                        <li>
-                            <a class="dropdown-item text-danger" href="{{ url_for('delete_post', post_id=post.id) }}">
-                                <span class="fa-solid fa-trash"></span>
-                                Delete
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
+                {% if post.user.id == current_user.id %}
+                    <div class="dropdown">
+                        <a
+                                class="text-reset me-3 dropdown-toggle hidden-arrow"
+                                type="button"
+                                id="dropdownMenuButton"
+                                data-mdb-toggle="dropdown"
+                                aria-expanded="false"
+                        >
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   href="{{ url_for('delete_post', post_id=post.id) }}">
+                                    <span class="fa-solid fa-trash"></span>
+                                    Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="card-body">

@@ -195,7 +195,12 @@ def like_comment():
 
 
 @app.route("/delete-post/<int:post_id>")
+@login_required
 def delete_post(post_id):
+    post_delete = Post.query.get(post_id)
+    if current_user.id != post_delete.user.id:
+        return redirect(url_for('home'))
+
     likes_of_post = LikedPost.query.filter_by(post_id=post_id)
     for like in likes_of_post:
         db.session.delete(like)
@@ -208,7 +213,6 @@ def delete_post(post_id):
             db.session.delete(like)
         db.session.delete(comment)
 
-    post_delete = Post.query.get(post_id)
     db.session.delete(post_delete)
     db.session.commit()
     return redirect(url_for('home'))
