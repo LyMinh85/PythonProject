@@ -210,7 +210,11 @@ def delete_post(post_id):
     post_delete = Post.query.get(post_id)
     print(post_delete.content)
     image_link = post_delete.content.split("<img src='")[1].split("'")[0]
-    os.remove(os.path.join(BASE_DIR, image_link))
+    image_link = image_link[1:]
+    try:
+        os.remove(os.path.join(BASE_DIR, image_link))
+    except:
+        pass
 
     if current_user.id != post_delete.user.id:
         return redirect(url_for('home'))
