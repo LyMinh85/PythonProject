@@ -75,13 +75,17 @@ def new_post():
     form = NewPostForm()
     if form.validate_on_submit():
         f = form.photo.data
-        filename = secure_filename(f.filename)
-        file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
-        print(file_path)
-        f.save(file_path)
+        if f is not None:
+            filename = secure_filename(f.filename)
+            file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
+            print(file_path)
+            f.save(file_path)
+            img_tag = f"<img src='/{UPLOAD_FOLDER + filename}' />"
+        else:
+            img_tag = ""
         today = datetime.now()
         title = form.title.data
-        content = form.content.data + f"<img src='{UPLOAD_FOLDER + filename}' />"
+        content = form.content.data + img_tag
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         db.session.add(new_post_obj)
         db.session.commit()
