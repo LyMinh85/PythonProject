@@ -26,3 +26,5 @@ Werkzeug==2.1.2
 wheel==0.37.1
 WTForms==3.0.1
 psycopg2-binary==2.9.3
+
+cloudinary~=1.29.0

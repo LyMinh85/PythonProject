@@ -5,6 +5,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import login_user, current_user, login_required, logout_user
 from datetime import datetime
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name="du163r961",
+    api_key="285871813253389",
+    api_secret="dwkt_MEA-26mecPgXsjMnGltatY"
+)
 
 # Hàm hiển thị thời gian
 from relative_date import display_time
@@ -75,18 +84,26 @@ def new_post():
     form = NewPostForm()
     if form.validate_on_submit():
         f = form.photo.data
+        file_path = ''
         if f is not None:
             filename = secure_filename(f.filename)
             file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
             print(file_path)
             f.save(file_path)
-            img_tag = f"<img src='/{UPLOAD_FOLDER + filename}' />"
+            img_tag = 'sad'
         else:
             img_tag = ""
         today = datetime.now()
         title = form.title.data
-        content = form.content.data + img_tag
+        content = form.content.data
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
+        if img_tag != "":
+            cloudinary.uploader.upload(file_path,
+                                       public_id=str(new_post_obj.id))
+            url = cloudinary.api.resource(str(new_post_obj.id))['url']
+            img_tag = f"<img src='{url}' />"
+            new_post_obj.content += img_tag
+
         db.session.add(new_post_obj)
         db.session.commit()
         return redirect(url_for('home'))
@@ -208,13 +225,6 @@ def like_comment():
 @login_required
 def delete_post(post_id):
     post_delete = Post.query.get(post_id)
-    print(post_delete.content)
-    image_link = post_delete.content.split("<img src='")[1].split("'")[0]
-    image_link = image_link[1:]
-    try:
-        os.remove(os.path.join(BASE_DIR, image_link))
-    except:
-        pass
 
     if current_user.id != post_delete.user.id:
         return redirect(url_for('home'))
