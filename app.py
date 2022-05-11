@@ -194,5 +194,25 @@ def like_comment():
     return ''
 
 
+@app.route("/delete-post/<int:post_id>")
+def delete_post(post_id):
+    likes_of_post = LikedPost.query.filter_by(post_id=post_id)
+    for like in likes_of_post:
+        db.session.delete(like)
+
+    comments_of_post = Comment.query.filter_by(post_id=post_id)
+
+    for comment in comments_of_post:
+        likes_of_comment = LikedComment.query.filter_by(comment_id=comment.id)
+        for like in likes_of_comment:
+            db.session.delete(like)
+        db.session.delete(comment)
+
+    post_delete = Post.query.get(post_id)
+    db.session.delete(post_delete)
+    db.session.commit()
+    return redirect(url_for('home'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,6 +1,7 @@
 from app import db
 from flask_login import UserMixin
 
+
 class Post(db.Model):
     __tablename__ = "posts"
 
@@ -92,4 +93,3 @@ class LikedComment(db.Model):
 
     comment = db.relationship('Comment', back_populates='likes')
     user = db.relationship('User', back_populates='liked_comments')
-
