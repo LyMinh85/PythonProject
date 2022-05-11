@@ -53,7 +53,7 @@
             <a href="{{ url_for('get_post', post_id=post.id) }}">
                 <h4 class="mb-3">{{ post.title }}</h4>
             </a>
-            <p class="mb-3 tx-14">{{ post.content | safe }}</p>
+            <div class="mb-3 tx-14">{{ post.content | safe }}</div>
         </div>
         <div class="card-footer">
             <ul class="list-unstyled d-flex justify-content-between mb-0 pe-xl-5">

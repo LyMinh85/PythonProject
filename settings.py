@@ -6,8 +6,12 @@ from flask_gravatar import Gravatar
 from flask_login import LoginManager
 import os
 
+UPLOAD_FOLDER = '\\static\\photos\\'
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12).hex()
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
 DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
@@ -26,3 +30,9 @@ login_manager.init_app(app)
 ckeditor = CKEditor(app)
 
 db = SQLAlchemy(app)
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+

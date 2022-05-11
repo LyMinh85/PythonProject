@@ -6,13 +6,13 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('new_post') }}" class="p-md-5 m-md-5 p-2" style="margin-top: 100px;" method="post">
+    <form action="{{ url_for('new_post') }}" class="p-md-5 m-md-5 p-2" style="margin-top: 100px;" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         {{ render_form(form, novalidate=True) }}
     </form>
 {% endblock %}
 
 {% block script %}
-    {{ ckeditor.load() }}
+    {{ ckeditor.load(pkg_type="basic") }}
     {{ ckeditor.config(name='content') }}
 {% endblock %}

@@ -2,13 +2,14 @@
 from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_login import login_user, current_user, login_required, logout_user
 from datetime import datetime
 
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
-from settings import app, db, login_manager
+from settings import app, db, login_manager, os, UPLOAD_FOLDER
 # Các models của database
 from models import Post, User, Comment, LikedComment, LikedPost
 # Các Form
@@ -73,9 +74,14 @@ def new_post():
     """
     form = NewPostForm()
     if form.validate_on_submit():
+        f = form.photo.data
+        filename = secure_filename(f.filename)
+        file_path = app.root_path + app.config['UPLOAD_FOLDER'] + filename
+        f.save(file_path)
+
         today = datetime.now()
         title = form.title.data
-        content = form.content.data
+        content = form.content.data + f"<img src='{UPLOAD_FOLDER + filename}' />"
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         db.session.add(new_post_obj)
         db.session.commit()
@@ -198,6 +204,10 @@ def like_comment():
 @login_required
 def delete_post(post_id):
     post_delete = Post.query.get(post_id)
+    print(post_delete.content)
+    image_link = post_delete.content.split("<img src='")[1].split("'")[0]
+    os.remove(app.root_path + image_link)
+
     if current_user.id != post_delete.user.id:
         return redirect(url_for('home'))
 

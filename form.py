@@ -1,12 +1,17 @@
 from flask_wtf import FlaskForm
 from flask_ckeditor import CKEditorField
-from wtforms import StringField, SubmitField, EmailField, PasswordField, TextAreaField
+from wtforms import StringField, SubmitField, EmailField, PasswordField, TextAreaField, FileField
 from wtforms.validators import DataRequired, Email, EqualTo
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+
+ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
 
 
 class NewPostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = CKEditorField('Content', validators=[DataRequired()])
+    photo = FileField('Image', validators=[FileRequired(),
+                                           FileAllowed(ALLOWED_EXTENSIONS, 'Images only!')])
     submit = SubmitField('Post')
 
 
