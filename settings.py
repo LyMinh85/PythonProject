@@ -4,6 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
 from flask_login import LoginManager
+from flask_minify import Minify
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +30,7 @@ boostrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 ckeditor = CKEditor(app)
+Minify(app=app, html=True, js=True, cssless=True)
 
 db = SQLAlchemy(app)
 
