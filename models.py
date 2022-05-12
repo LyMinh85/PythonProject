@@ -9,8 +9,8 @@ class Post(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     title = db.Column(db.String, nullable=False)
     content = db.Column(db.Text, nullable=False)
-
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
     user = db.relationship("User", back_populates='posts')
 
     comments = db.relationship('Comment', back_populates='post', lazy='dynamic')
@@ -19,7 +19,6 @@ class Post(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
@@ -65,11 +64,10 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     content = db.Column(db.String, nullable=False)
-
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', back_populates='comments')
-
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+    user = db.relationship('User', back_populates='comments')
     post = db.relationship('Post', back_populates='comments')
 
     likes = db.relationship('LikedComment', back_populates='comment', lazy='dynamic')

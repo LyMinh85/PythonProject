@@ -96,11 +96,13 @@ def new_post():
         today = datetime.now()
         title = form.title.data
         content = form.content.data
+        random_string = os.urandom(4).hex()
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if img_tag != "":
-            cloudinary.uploader.upload(file_path,
-                                       public_id=str(new_post_obj.id))
-            url = cloudinary.api.resource(str(new_post_obj.id))['url']
+            response = cloudinary.uploader.upload(file_path,
+                                       public_id=str(new_post_obj.id) + random_string,
+                                       folder='/hiiam',unique_filename = False)
+            url = response['url']
             img_tag = f"<img src='{url}' />"
             new_post_obj.content += img_tag
 
