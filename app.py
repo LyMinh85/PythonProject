@@ -8,13 +8,6 @@ from datetime import datetime
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-
-cloudinary.config(
-    cloud_name="du163r961",
-    api_key="285871813253389",
-    api_secret="dwkt_MEA-26mecPgXsjMnGltatY"
-)
-
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
@@ -24,6 +17,12 @@ from models import Post, User, Comment, LikedComment, LikedPost
 # Các Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
 
+
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -96,12 +95,11 @@ def new_post():
         today = datetime.now()
         title = form.title.data
         content = form.content.data
-        random_string = os.urandom(4).hex()
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if img_tag != "":
             response = cloudinary.uploader.upload(file_path,
-                                       public_id=str(new_post_obj.id) + random_string,
-                                       folder='/hiiam',unique_filename = False)
+                                       public_id=os.urandom(4).hex(),
+                                       folder='/hiiam', use_filename=True, unique_filename = True)
             url = response['url']
             img_tag = f"<img src='{url}' />"
             new_post_obj.content += img_tag

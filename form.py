@@ -9,7 +9,7 @@ ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
 
 class NewPostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    content = CKEditorField('Content', validators=[DataRequired()])
+    content = CKEditorField('Content', validators=[])
     photo = FileField('Image', validators=[FileAllowed(ALLOWED_EXTENSIONS, 'Images only!')])
     submit = SubmitField('Post')
 
