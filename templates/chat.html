@@ -4,7 +4,9 @@
     <style>
         body {
             background-color: white;
-            margin: 0; height: 100%; overflow: hidden;
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
         }
 
         body::-webkit-scrollbar {
@@ -58,6 +60,7 @@
             integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
             crossorigin="anonymous"></script>
     <script>
+        let message_holder = document.getElementById('message_holder');
         const rand = function () {
             return Math.random().toString(36).substr(2); // remove `0.`
         };
@@ -73,9 +76,12 @@
             }
         })
 
-        document.getElementById('message_holder').lastElementChild.scrollIntoView({
-            behavior: 'smooth'
-        });
+        if (message_holder.lastElementChild !== null) {
+            message_holder.lastElementChild.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
 
         const socket = io();
         socket.on('connect', function () {
@@ -84,13 +90,11 @@
 
             function leaveThread(threadId) {
                 socket.emit('leave', {'room': threadId});
-                document.getElementById('message_holder').innerHTML += "Leave the chat";
             }
 
             function joinThread(threadId) {
                 socket.emit('join', {'room': threadId});
             }
-
 
             document.getElementById('thread-content').addEventListener('click', function (e) {
                 if (e.target.tagName !== 'BUTTON') return;
@@ -108,7 +112,7 @@
                 });
 
                 message_target.val('').focus();
-                document.getElementById('message_holder').innerHTML +=
+                message_holder.innerHTML +=
                     `
                                     <div class="d-flex flex-row justify-content-end">
                                         <div>
@@ -137,8 +141,8 @@
                 });
             } else {
                 console.log(`User_id: ${msg.user_id} haa send message`);
-                document.getElementById('message_holder').innerHTML += msg.html;
-                document.getElementById('message_holder').lastElementChild.scrollIntoView({
+                message_holder.innerHTML += msg.html;
+                message_holder.lastElementChild.scrollIntoView({
                     behavior: 'smooth'
                 });
             }
