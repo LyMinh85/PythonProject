@@ -88,10 +88,9 @@ def new_post():
         content = form.content.data
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if img_tag != "":
-            while not os.path.exists(file_path):
-                time.sleep(1)
+            random_string = os.urandom(4).hex()
             response = cloudinary.uploader.upload(file_path,
-                                                  public_id=str(os.urandom(4).hex()),
+                                                  public_id=random_string,
                                                   folder='/hiiam', unique_filename=False
                                                   )
             url = response['url']
