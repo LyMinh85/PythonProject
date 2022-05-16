@@ -9,6 +9,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import os
+import time
 from flask_socketio import join_room, leave_room, send, emit
 # Hàm hiển thị thời gian
 from relative_date import display_time
@@ -19,7 +20,6 @@ from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadP
 # Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
 
-print(os.environ.get('CLOUDINARY_API_KEY'))
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUD_NAME'),
@@ -84,6 +84,8 @@ def new_post():
         content = form.content.data
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if f is not None:
+            while not os.path.exists(file_path):
+                time.sleep(1)
             response = cloudinary.uploader.upload(file_path,
                                                   public_id=os.urandom(4).hex(),
                                                   folder='/hiiam')
