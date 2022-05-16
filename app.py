@@ -9,7 +9,6 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from flask_socketio import join_room, leave_room, send, emit
-import json
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
@@ -296,4 +295,4 @@ def on_leave(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    app.run(debug=True)
