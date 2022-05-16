@@ -4,7 +4,7 @@ from wtforms import StringField, SubmitField, EmailField, PasswordField, TextAre
 from wtforms.validators import DataRequired, Email, EqualTo
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
-ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
+ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg']
 
 
 class NewPostForm(FlaskForm):

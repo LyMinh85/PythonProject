@@ -1,9 +1,9 @@
 {% for post in posts.items %}
     {% if loop.last %}
         {% if posts.has_next %}
-            {% set get_url = url_for('get_all_posts', page=posts.next_num) %}
+            {% set get_url = url_for('get_all_posts', user_id=user_id, page=posts.next_num) %}
         {% else %}
-            {% set get_url = url_for('get_all_posts', page=0) %}
+            {% set get_url = url_for('get_all_posts', user_id=user_id, page=0) %}
         {% endif %}
         <div class="row"
              hx-get="{{ get_url }}"
@@ -18,10 +18,14 @@
         <div class="card-header">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <img class="img-xs rounded-circle"
-                         src="{{ post.user.email | gravatar }}" alt="">
+                    <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
+                        <img class="img-xs rounded-circle"
+                             src="{{ post.user.email | gravatar }}" alt="">
+                    </a>
                     <div class="ms-2 d-flex">
-                        <p class="fw-bold mb-0">{{ post.user.name }}</p>
+                        <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
+                            <p class="text-dark fw-bold mb-0">{{ post.user.name }}</p>
+                        </a>
                         <p class="tx-11 ms-2 mb-0 text-muted">{{ display_time(post.date) }}</p>
                     </div>
                 </div>

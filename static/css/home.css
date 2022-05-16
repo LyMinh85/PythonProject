@@ -72,7 +72,11 @@ img {
     color: #0d6efd;
 }
 
-.card-body img {
+.btn-link .fa-arrow-left{
+
+}
+
+#list-post .card-body img {
     width: 100% !important;
     height: auto !important;
 }
@@ -81,3 +85,26 @@ img {
     margin: 1.75rem auto;
 }
 
+.sticky {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 68px;
+}
+
+.selected {
+    background-color: #ebebeb;
+}
+
+.badge-dot {
+border-radius: 50%;
+height: 10px;
+width: 10px;
+margin-left: 2.9rem;
+margin-top: -.75rem;
+}
+
+@media (max-width: 768px) {
+    .hidden-sm {
+        display: none;
+    }
+}

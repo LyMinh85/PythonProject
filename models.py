@@ -28,6 +28,9 @@ class User(UserMixin, db.Model):
     comments = db.relationship("Comment", back_populates='user', lazy='dynamic')
     liked_posts = db.relationship('LikedPost', back_populates='user', lazy='dynamic')
     liked_comments = db.relationship('LikedComment', back_populates='user', lazy='dynamic')
+    user_messages = db.relationship('Message', back_populates='user', lazy='dynamic')
+    read_messages = db.relationship('MessageReadState')
+    thread_participants = db.relationship('ThreadParticipant', back_populates='user', lazy='dynamic')
 
     def like_post(self, post_id):
         like = LikedPost(user_id=self.id, post_id=post_id)
@@ -91,3 +94,50 @@ class LikedComment(db.Model):
 
     comment = db.relationship('Comment', back_populates='likes')
     user = db.relationship('User', back_populates='liked_comments')
+
+
+class Thread(db.Model):
+    __tablename__ = 'threads'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    participants = db.relationship('ThreadParticipant', back_populates='thread')
+    thread_messages = db.relationship('Message', back_populates='thread', lazy='dynamic')
+
+
+class ThreadParticipant(db.Model):
+    __tablename__ = 'thread_participants'
+
+    thread_id = db.Column(db.Integer, db.ForeignKey('threads.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+
+    thread = db.relationship('Thread', back_populates='participants')
+    user = db.relationship('User', back_populates='thread_participants')
+
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    thread_id = db.Column(db.Integer, db.ForeignKey('threads.id'))
+    send_date = db.Column(db.DateTime, nullable=False)
+    sending_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    body = db.Column(db.String, nullable=False)
+
+    user = db.relationship('User', back_populates='user_messages')
+    read_state = db.relationship('MessageReadState')
+    thread = db.relationship('Thread', back_populates='thread_messages')
+
+
+class MessageReadState(db.Model):
+    __tablename__ = 'messages_read_state'
+
+    message_id = db.Column(db.Integer, db.ForeignKey('messages.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    read_date = db.Column(db.DateTime, nullable=False)
+
+    message = db.relationship('Message')
+    user = db.relationship('User')
+
+
+db.create_all()

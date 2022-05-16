@@ -1,0 +1,84 @@
+<div class="navbar container-fluid ps-0">
+    <div class="d-flex ">
+        <a href="{{ url_for('chat_page') }}"
+           class="btn btn-link btn-rounded text-dark">
+            <i class="fa-solid fa-arrow-left fa-lg"></i>
+        </a>
+
+        <a class="d-flex align-items-center text-dark" href="{{ url_for('get_profile', user_id=user.id) }}">
+            <img
+                    src="{{ user.email | gravatar }}"
+                    class="rounded-circle pe-2"
+                    height="40"
+                    alt="Account"
+                    loading="lazy"
+            />
+            <span class="fs-4 fw-bold">{{ user.name }}</span>
+        </a>
+    </div>
+
+
+</div>
+
+
+<div class="overflow-scroll px-3 pt-3" id="message_holder" data-mdb-perfect-scrollbar="true"
+     style="position: relative;height: 82vh;z-index: 1; bottom: 0;">
+
+    {% for message in reversed(messages.items) %}
+        {% if message.sending_user_id == current_user.id %}
+            <div class="d-flex flex-row justify-content-end">
+                <div>
+                    <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
+                        {{ message.body }}
+                    </p>
+                    <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+                    </p>
+                    <p class="small me-3 mb-3 rounded-3 text-muted position-absolute text-nowrap" style="right: 0;">
+                        {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+                    </p>
+                </div>
+
+                <img src="{{ current_user.email | gravatar }}"
+                     class="rounded-circle"
+                     alt="avatar 1" style="width: 30px; height: 100%;">
+            </div>
+        {% else %}
+            <div class="d-flex flex-row justify-content-start">
+                <img src="{{ message.user.email | gravatar }}"
+                     class="rounded-circle"
+                     alt="avatar 1" style="width: 30px; height: 100%;">
+                <div>
+                    <p class="p-2 ms-3 me-5 mb-1 rounded-3"
+                       style="background-color: #f5f6f7;">
+                        {{ message.body }}
+                    </p>
+                    <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+                    </p>
+                    <p class="small ms-3 mb-3 rounded-3 text-muted float-start position-absolute" style="left: 0;">
+                        {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+</div>
+
+<div>
+    <div class="text-muted d-flex justify-content-start align-items-center px-2 bg-light">
+        <img src="{{ current_user.email | gravatar }}" class="rounded-circle"
+             alt="avatar 3" style="width: 40px; height: 100%;">
+        <input type="text" class="form-control form-control-lg rounded-3 m-2"
+               id="message"
+               placeholder="Type message">
+        <a class="ms-1 text-muted"><i class="fas fa-paperclip"></i></a>
+        <a class="ms-3 text-muted"><i class="fas fa-smile"></i></a>
+        <button id="button-send-message" type="submit" class="ms-3 text-primary border-0 bg-white fas fa-paper-plane"
+                data-id="{{ thread.id }}">
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+</script>

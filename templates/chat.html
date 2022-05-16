@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <style>
+        body {
+            background-color: white;
+            margin: 0; height: 100%; overflow: hidden;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="me-2 ms-2" style="min-height: 100vh;height:100vh;background-color: white;">
+
+        <div class="row vh-100">
+            <div class="col-md-12">
+
+                <div class="card vh-100" id="chat3" style="border-radius: 15px;">
+                    <div class="card-body p-0">
+
+                        <div class="row vh-100">
+
+                            {% if chat_thread_html %} {# If selected thread #}
+                                <div id="list-thread" class="col-md-6 col-lg-5 col-xl-4 hidden-sm p-0 border-end">
+                                    {{ list_thread_template | safe }}
+                                </div>
+                            {% else %}
+                                <div id="list-thread" class="col-md-6 col-lg-5 col-xl-4 p-0 border-end">
+                                    {{ list_thread_template | safe }}
+                                </div>
+                            {% endif %}
+
+                            <div class="col-md-6 col-lg-7 col-xl-8 ps-0 pe-0" id="thread-content">
+
+                                {% if chat_thread_html %}
+                                    {{ chat_thread_html | safe }}
+                                {% endif %}
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+            integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+            crossorigin="anonymous"></script>
+    <script>
+        const rand = function () {
+            return Math.random().toString(36).substr(2); // remove `0.`
+        };
+
+        const token = function () {
+            return rand() + rand(); // to make it longer
+        };
+
+        document.getElementById('message').addEventListener('keyup', event => {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                document.getElementById('button-send-message').click();
+            }
+        })
+
+        document.getElementById('message_holder').lastElementChild.scrollIntoView({
+            behavior: 'smooth'
+        });
+
+        const socket = io();
+        socket.on('connect', function () {
+            let newThreadId = {{ thread.id }};
+            joinThread(newThreadId);
+
+            function leaveThread(threadId) {
+                socket.emit('leave', {'room': threadId});
+                document.getElementById('message_holder').innerHTML += "Leave the chat";
+            }
+
+            function joinThread(threadId) {
+                socket.emit('join', {'room': threadId});
+            }
+
+
+            document.getElementById('thread-content').addEventListener('click', function (e) {
+                if (e.target.tagName !== 'BUTTON') return;
+                const now = new Date();
+                let message_target = $('#message');
+                let user_input = message_target.val();
+                const rand_token = token();
+                socket.emit('send-message', {
+                    'user_id': {{ current_user.id }},
+                    'message': user_input,
+                    'send_date': now,
+                    'token': rand_token,
+                    'thread_id': parseInt(e.target.dataset.id),
+                    'room': parseInt(e.target.dataset.id)
+                });
+
+                message_target.val('').focus();
+                document.getElementById('message_holder').innerHTML +=
+                    `
+                                    <div class="d-flex flex-row justify-content-end">
+                                        <div>
+                                            <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
+                                                ${user_input}
+                                            </p>
+                                            <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+                                            </p>
+                                            <p class="small me-3 mb-3 rounded-3 text-muted float-end position-absolute text-nowrap"
+                                                style="right: 0;"
+                                                id="${rand_token}">
+                                            </p>
+                                        </div>
+                                        <img src="{{ current_user.email | gravatar }}"
+                                             class="rounded-circle"
+                                             alt="avatar 1" style="width: 30px; height: 100%;">
+                                    </div>
+                    `;
+            });
+        })
+        socket.on('received-message', function (msg) {
+            if (msg.user_id === {{ current_user.id }}) {
+                document.getElementById(msg.token).innerHTML = msg.send_date;
+                document.getElementById(msg.token).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            } else {
+                console.log(`User_id: ${msg.user_id} haa send message`);
+                document.getElementById('message_holder').innerHTML += msg.html;
+                document.getElementById('message_holder').lastElementChild.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+
+        })
+
+    </script>
+{% endblock %}
+

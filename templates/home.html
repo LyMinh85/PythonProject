@@ -19,9 +19,9 @@
 
             <div class="row profile-body justify-content-md-center">
                 <!-- middle wrapper start -->
-                <div id="list-post" class="col-md-8 col-xl-6 middle-wrapper">
+                <div id="list-post" class="col-md-7 middle-wrapper">
 
-                    <div hx-get="{{ url_for('get_all_posts', page=1) }}"
+                    <div hx-get="{{ url_for('get_all_posts', user_id=0, page=1) }}"
                          hx-trigger="revealed"
                          hx-swap="afterend"></div>
 

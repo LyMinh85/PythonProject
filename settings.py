@@ -5,6 +5,7 @@ from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
 from flask_login import LoginManager
 from flask_minify import Minify
+from flask_socketio import SocketIO
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,12 +31,13 @@ boostrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 ckeditor = CKEditor(app)
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
 Minify(app=app, html=True, js=True, cssless=True)
 
 db = SQLAlchemy(app)
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 

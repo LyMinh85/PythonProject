@@ -1,6 +1,6 @@
 # Các thư viện
 from flask import render_template, request, redirect, url_for, flash
-from sqlalchemy import desc
+from sqlalchemy import desc, subquery
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import login_user, current_user, login_required, logout_user
@@ -8,15 +8,16 @@ from datetime import datetime
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from flask_socketio import join_room, leave_room, send, emit
+import json
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
-from settings import app, db, login_manager, os, UPLOAD_FOLDER, BASE_DIR
+from settings import app, db, login_manager, os, UPLOAD_FOLDER, BASE_DIR, socketio
 # Các models của database
-from models import Post, User, Comment, LikedComment, LikedPost
-# Các Form
+from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadParticipant, Message, MessageReadState
+# Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
-
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUD_NAME'),
@@ -24,9 +25,15 @@ cloudinary.config(
     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
 )
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@app.errorhandler(401)
+def custom_401(error):
+    return redirect(url_for('login'))
 
 
 @app.route('/')
@@ -34,32 +41,20 @@ def home():
     return render_template("home.html")
 
 
-@app.route('/get-all-posts')
-def get_all_posts():
-    """
-    Nếu hiển thị hết post (page == 0)
-        Hiển thị đã hết post
-    Sắp xếp giảm dần tất cả post. Phân trang mỗi trang 5 post \n
-    Trả về 5 post theo số page
-    """
-    page = request.args.get('page', type=int)
-    if page == 0:
-        return render_template('post-card.html', posts=None, display_time=display_time, now=datetime.now())
-    posts = Post.query.order_by(desc(Post.id)).paginate(page=page, per_page=5)
-    return render_template("post-card.html", posts=posts, display_time=display_time, now=datetime.now())
+@app.route('/get-all-posts/<int:user_id>/<int:page>')
+def get_all_posts(user_id, page):
+    posts = None
+    if page != 0:
+        if user_id == 0:
+            posts = Post.query.order_by(desc(Post.id)).paginate(page=page, per_page=5)
+        else:
+            posts = Post.query.filter_by(user_id=user_id).order_by(desc(Post.id)).paginate(page=page, per_page=5)
+    return render_template("post-card.html", posts=posts, user_id=user_id, display_time=display_time)
 
 
 @app.route('/like-post', methods=["GET"])
 @login_required
 def like_post():
-    """
-    Để truy cập route này cần phải đăng nhập \n
-    Lấy id của post và id của người dùng hiện tại. \n
-    Nếu người dùng đã like post:
-        Bỏ like post
-    Ngược lại:
-        Like post
-    """
     post_id = int(request.args.get('id'))
     if current_user.has_liked_post(post_id):
         current_user.unlike_post(post_id)
@@ -73,13 +68,6 @@ def like_post():
 @app.route('/new-post', methods=['GET', "POST"])
 @login_required
 def new_post():
-    """
-    Method == GET:
-        Hiển thị form đăng post mới.
-    Method == POST:
-        Xác nhận form
-            Tạo obj Post mới rồi add vô database.
-    """
     form = NewPostForm()
     if form.validate_on_submit():
         f = form.photo.data
@@ -89,20 +77,18 @@ def new_post():
             file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
             print(file_path)
             f.save(file_path)
-            img_tag = 'sad'
-        else:
-            img_tag = ""
         today = datetime.now()
         title = form.title.data
         content = form.content.data
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
-        if img_tag != "":
+        if f is not None:
             response = cloudinary.uploader.upload(file_path,
-                                       public_id=os.urandom(4).hex(),
-                                       folder='/hiiam', use_filename=True, unique_filename = True)
+                                                  public_id=os.urandom(4).hex(),
+                                                  folder='/hiiam',
+                                                  use_filename=True,
+                                                  unique_filename=True)
             url = response['url']
-            img_tag = f"<img src='{url}' />"
-            new_post_obj.content += img_tag
+            new_post_obj.content += f"<img src='{url}' loading='lazy'/>"
 
         db.session.add(new_post_obj)
         db.session.commit()
@@ -112,13 +98,6 @@ def new_post():
 
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
-    """
-    Method == GET:
-        Hiển thị form đăng ký.
-    Method == POST:
-        Xác nhận form, nếu thỏa thì tạo obj User mới rồi add vô database.
-        Đăng nhập user vừa tạo.
-    """
     form = SignUpForm()
     if form.validate_on_submit():
         salt = generate_password_hash(form.password.data, 'pbkdf2:sha256', salt_length=8)
@@ -132,17 +111,6 @@ def sign_up():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    Method == GET:
-        Hiển thị form đăng nhập.
-    Method == POST:
-        Xác nhận form:
-            Tìm user có email vừa nhập trong database.
-                Nếu không tìm thấy, hiển thị lỗi và Hiển thị lại form đăng nhập.
-            Kiểm tra password:
-                Nếu sai cũng hiển thị lỗi và Hiển thị lại form đăng nhập.
-            Nếu tất cả đều thỏa thì đăng nhập người dùng.
-    """
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -160,19 +128,12 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    """
-    Đăng xuất người dùng hiện tại
-    """
     logout_user()
     return redirect(url_for('home'))
 
 
 @app.route("/post/<int:post_id>")
 def get_post(post_id):
-    """
-    :param post_id: id của post cần xem.
-    :return: render post.
-    """
     post = Post.query.get(post_id)
     form = CommentForm()
     return render_template('post.html', post=post, display_time=display_time, form=form)
@@ -181,13 +142,6 @@ def get_post(post_id):
 @app.route("/send-comment/<int:post_id>", methods=['POST'])
 @login_required
 def send_comment(post_id):
-    """
-    Nếu form đã xác nhận:
-        Tạo obj Comment mới rồi add vô database.
-        Reset lại form.content bằng chuỗi rỗng.
-    :param post_id: id của post cần comment.
-    :return: render phần comments
-    """
     form = CommentForm()
     post = Post.query.get(post_id)
     if form.validate_on_submit():
@@ -203,14 +157,6 @@ def send_comment(post_id):
 @app.route('/like-comment', methods=["GET"])
 @login_required
 def like_comment():
-    """
-        Để truy cập route này cần phải đăng nhập \n
-        Lấy id của comment và id của người dùng hiện tại. \n
-        Nếu người dùng đã like comment:
-            Bỏ like comment
-        Ngược lại:
-            Like comment
-    """
     comment_id = int(request.args.get('id'))
     if current_user.has_liked_comment(comment_id):
         current_user.unlike_comment(comment_id)
@@ -246,5 +192,108 @@ def delete_post(post_id):
     return redirect(url_for('home'))
 
 
+@app.route('/user/profile/<int:user_id>')
+def get_profile(user_id):
+    user = User.query.get(user_id)
+
+    count_liked = 0
+    for post in user.posts:
+        count_liked += post.post_likes.count()
+
+    return render_template('profile.html', user=user, count_liked=count_liked)
+
+
+@app.route('/create-new-thread/<int:user_id>', methods=['GET'])
+@login_required
+def create_new_thread(user_id):
+    thread_current_user = ThreadParticipant.query.filter_by(user_id=current_user.id)
+    sq = ThreadParticipant.query.filter_by(user_id=user_id).subquery()
+    result = thread_current_user.join(sq, ThreadParticipant.thread_id == sq.c.thread_id).first()
+    if result:
+        return redirect(url_for('chat_page'))
+    new_thread = Thread()
+    db.session.add(new_thread)
+    db.session.flush()
+    new_participant_1 = ThreadParticipant(thread_id=new_thread.id, user_id=current_user.id)
+    new_participant_2 = ThreadParticipant(thread_id=new_thread.id, user_id=user_id)
+    db.session.add(new_participant_1)
+    db.session.add(new_participant_2)
+    db.session.commit()
+    return redirect(url_for('chat_page'))
+
+
+@app.route('/chat')
+@login_required
+def chat_page():
+    thread_id = request.args.get('thread_id')
+    threads = Thread.query.join(Thread.participants).filter_by(user_id=current_user.id)
+    chat_thread_html = None
+    thread = None
+    if thread_id:
+        thread = Thread.query.get(thread_id)
+        user = None
+        for participant in thread.participants:
+            if participant.user.id != current_user.id:
+                user = participant.user
+        messages = thread.thread_messages.order_by(desc(Message.id)).paginate(page=1, per_page=10)
+        chat_thread_html = render_template('chat-thread.html',
+                                           thread=thread,
+                                           messages=messages,
+                                           user=user,
+                                           reversed=reversed)
+    list_thread_template = render_template('list-thread.html',
+                                           threads=threads,
+                                           Message=Message,
+                                           desc=desc,
+                                           current_thread=thread)
+    return render_template('chat.html',
+                           list_thread_template=list_thread_template,
+                           chat_thread_html=chat_thread_html,
+                           thread=thread
+                           )
+
+
+@socketio.on('send-message')
+@login_required
+def handle_my_custom_event(data, methods=['GET', 'POST']):
+    user_send = User.query.get(int(data['user_id']))
+    new_message = Message(
+        thread_id=data['thread_id'],
+        send_date=datetime.now(),
+        sending_user_id=data['user_id'],
+        body=data['message']
+    )
+    db.session.add(new_message)
+    db.session.commit()
+    json_response = {
+        'user_id': user_send.id,
+        'html': render_template(
+            'message.html',
+            user_send=user_send,
+            message=data['message'],
+            send_date=datetime.now()
+        ),
+        'send_date': datetime.now().strftime('%d/%m/%Y, %I:%M %p'),
+        'token': data['token'],
+    }
+    emit('received-message', json_response, room=data['thread_id'])
+
+
+@socketio.on('join')
+@login_required
+def on_join(data):
+    room = data['room']
+    join_room(room)
+    send(f"Join", room=room)
+
+
+@socketio.on('leave')
+@login_required
+def on_leave(data):
+    room = data['room']
+    leave_room(room)
+    send(f"Leave", room=room)
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)

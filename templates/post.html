@@ -13,7 +13,7 @@
     <div id="post-header" class="fixed-top container-md" style="top: 70px;">
         <div class="profile-page tx-13">
             <div class="row profile-body justify-content-md-center">
-                <div class="col-md-8 col-xl-6">
+                <div class="col-md-7">
                     <div class="card rounded mt-2 mb-4">
                         <div class="card-header p-2">
                             <ul class="list-unstyled d-flex mb-0 pe-xl-5">
@@ -40,7 +40,7 @@
             <div class="row profile-body justify-content-md-center">
 
                 <!-- middle wrapper start -->
-                <div class="col-md-8 col-xl-6 middle-wrapper">
+                <div class="col-md-7 middle-wrapper">
                     <div class="col-md-12 grid-margin">
 
 
@@ -48,10 +48,14 @@
                             <div class="card-header">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
-                                        <img class="img-xs rounded-circle"
+                                        <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
+                                            <img class="img-xs rounded-circle"
                                              src="{{ post.user.email | gravatar }}" alt="">
+                                        </a>
                                         <div class="ms-2 d-flex">
-                                            <p class="fw-bold mb-0">{{ post.user.name }}</p>
+                                            <a href="{{ url_for('get_profile', user_id=post.user.id) }}" class="text-dark">
+                                                <p class="fw-bold mb-0">{{ post.user.name }}</p>
+                                            </a>
                                             <p class="tx-11 ms-2 mb-0 text-muted">{{ display_time(post.date) }}</p>
                                         </div>
 

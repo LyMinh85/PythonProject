@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <style>
+        body {
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="container-md py-5 h-100">
+        <div class="row d-flex profile-body justify-content-center h-100">
+            <div class="col-md-3 mb-5">
+                <div class="card sticky">
+                    <div class="rounded-top text-dark d-flex flex-column justify-content-center">
+                        <div class="d-flex flex-column align-items-center profile-image">
+                            <img src="{{ user.email | gravatar(size=200) }}"
+                                 alt="Generic placeholder image"
+                                 class="img-fluid rounded-circle img-thumbnail mt-4 mb-2"
+                                 style="width: 150px; z-index: 1">
+                        </div>
+                        <div class="d-flex flex-row justify-content-center">
+                            <div class="d-flex flex-column align-items-center" style="width: 150px;">
+                                <h5>{{ user.name }}</h5>
+                                {% if current_user.id == user.id %}
+                                    <button type="button" class="btn btn-outline-primary" data-mdb-ripple-color="primary"
+                                            style="z-index: 1;">
+                                        Edit profile
+                                    </button>
+                                {% else %}
+                                    <a type="button" href="{{ url_for('create_new_thread', user_id=user.id) }}" class="btn btn-outline-primary" data-mdb-ripple-color="primary"
+                                            style="z-index: 1;">
+                                        Inbox
+                                    </a>
+                                {% endif %}
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="p-4 text-black">
+                        <div class="d-flex justify-content-center text-center py-1">
+                            <div class="w-25">
+                                <p class="mb-1 h5">{{ user.posts.count() }}</p>
+                                <p class="small text-muted mb-0">Posts</p>
+                            </div>
+                            <div class="w-25">
+                                <p class="mb-1 h5">{{ count_liked }}</p>
+                                <p class="small text-muted mb-0">Liked</p>
+                            </div>
+                            <div class="w-25">
+                                <p class="mb-1 h5">{{ user.liked_posts.count() }}</p>
+                                <p class="small text-muted mb-0">Likes</p>
+                            </div>
+                            <div class="w-25">
+                                <p class="mb-1 h5">{{ user.comments.count() }}</p>
+                                <p class="small text-muted mb-0">Commets</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 text-black">
+                        <div class="mb-5">
+                            <p class="lead fw-normal mb-1">About</p>
+                            <div class="p-4" style="background-color: #f8f9fa;">
+                                <p class="font-italic mb-1">Web Developer</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- middle wrapper start -->
+            <div id="list-post" class="col-md-9 col-xl-6 middle-wrapper">
+
+                <div hx-get="{{ url_for('get_all_posts',user_id=user.id, page=1) }}"
+                     hx-trigger="revealed"
+                     hx-swap="afterend"></div>
+
+            </div>
+            <!-- middle wrapper end -->
+        </div>
+
+    </div>
+{% endblock %}
