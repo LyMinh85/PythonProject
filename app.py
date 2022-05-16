@@ -82,10 +82,8 @@ def new_post():
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if f is not None:
             response = cloudinary.uploader.upload(file_path,
-                                                  public_id=os.urandom(4).hex(),
-                                                  folder='/hiiam',
-                                                  use_filename=True,
-                                                  unique_filename=True)
+                                                  public_id=os.urandom(8).hex(),
+                                                  folder='/hiiam')
             url = response['url']
             new_post_obj.content += f"<img src='{url}' loading='lazy'/>"
 
