@@ -74,23 +74,29 @@ def new_post():
     if form.validate_on_submit():
         f = form.photo.data
         file_path = ''
+        img_tag = ''
         if f is not None:
             filename = secure_filename(f.filename)
             file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
             print(file_path)
             f.save(file_path)
+            img_tag = 'sad'
+        else:
+            img_tag = ""
         today = datetime.now()
         title = form.title.data
         content = form.content.data
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
-        if f is not None:
+        if img_tag != "":
             while not os.path.exists(file_path):
                 time.sleep(1)
             response = cloudinary.uploader.upload(file_path,
-                                                  public_id=os.urandom(4).hex(),
-                                                  folder='/hiiam')
+                                                  public_id=str(os.urandom(4).hex()),
+                                                  folder='/hiiam', unique_filename=False
+                                                  )
             url = response['url']
-            new_post_obj.content += f"<img src='{url}' loading='lazy'/>"
+            img_tag = f"<img src='{url}' loading='lazy'/>"
+            new_post_obj.content += img_tag
 
         db.session.add(new_post_obj)
         db.session.commit()
