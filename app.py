@@ -8,15 +8,18 @@ from datetime import datetime
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+import os
 from flask_socketio import join_room, leave_room, send, emit
 # Hàm hiển thị thời gian
 from relative_date import display_time
 # Khởi tạo app
-from settings import app, db, login_manager, os, UPLOAD_FOLDER, BASE_DIR, socketio
+from settings import app, db, login_manager, UPLOAD_FOLDER, BASE_DIR, socketio
 # Các models của database
 from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadParticipant, Message, MessageReadState
 # Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
+
+print(os.environ.get('CLOUDINARY_API_KEY'))
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUD_NAME'),
@@ -82,7 +85,7 @@ def new_post():
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         if f is not None:
             response = cloudinary.uploader.upload(file_path,
-                                                  public_id=os.urandom(8).hex(),
+                                                  public_id=os.urandom(4).hex(),
                                                   folder='/hiiam')
             url = response['url']
             new_post_obj.content += f"<img src='{url}' loading='lazy'/>"
