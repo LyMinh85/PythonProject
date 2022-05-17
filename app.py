@@ -9,7 +9,6 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import os
-import time
 from flask_socketio import join_room, leave_room, send, emit
 # Hàm hiển thị thời gian
 from relative_date import display_time
@@ -19,13 +18,6 @@ from settings import app, db, login_manager, UPLOAD_FOLDER, BASE_DIR, socketio
 from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadParticipant, Message, MessageReadState
 # Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
-
-# Cloudinary config
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
 
 
 @login_manager.user_loader
@@ -74,13 +66,17 @@ def new_post():
     if form.validate_on_submit():
         f = form.photo.data
         img_tag = ''
-        if f is not None:
+        if f:
             # Upload photo into cloudinary api
             random_string = os.urandom(8).hex()
-            response = cloudinary.uploader.upload(f,
-                                                  public_id=random_string,
-                                                  folder='/hiiam', unique_filename=False
-                                                  )
+            # Cloudinary config
+            cloudinary.config(
+                cloud_name=os.getenv('CLOUD_NAME'),
+                api_key=os.getenv('CLOUDINARY_API_KEY'),
+                api_secret=os.getenv('CLOUDINARY_API_SECRET')
+            )
+            print(os.getenv('CLOUD_NAME'), os.getenv('CLOUDINARY_API_KEY'), os.getenv('CLOUDINARY_API_SECRET'), sep='\n')
+            response = cloudinary.uploader.upload(f, folder='/hiiam')
             url = response['url']
             img_tag = f"<img src='{url}' loading='lazy'/>"
         today = datetime.now()
