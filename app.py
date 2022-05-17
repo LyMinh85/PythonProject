@@ -19,29 +19,42 @@ from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadP
 # Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
 
+# Cloudinary config
+cloudinary.config(
+    cloud_name=os.getenv('CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
+
 
 @login_manager.user_loader
 def load_user(user_id):
+    # Load current user
     return User.query.get(int(user_id))
 
 
 @app.errorhandler(401)
 def custom_401(error):
+    # Xử lý các request có error code là 401
     return redirect(url_for('login'))
 
 
 @app.route('/')
 def home():
+    # Home route
     return render_template("home.html")
 
 
 @app.route('/get-all-posts/<int:user_id>/<int:page>')
 def get_all_posts(user_id, page):
+    # Lấy 5 post mới nhật của user (nếu có) ở trang thứ page
     posts = None
+    # Nếu chưa hết trang
     if page != 0:
+        # Lấy tất cả post
         if user_id == 0:
             posts = Post.query.order_by(desc(Post.id)).paginate(page=page, per_page=5)
-        else:
+        else:  # Lấy tất cả post của user thuộc user_id
             posts = Post.query.filter_by(user_id=user_id).order_by(desc(Post.id)).paginate(page=page, per_page=5)
     return render_template("post-card.html", posts=posts, user_id=user_id, display_time=display_time)
 
@@ -50,9 +63,11 @@ def get_all_posts(user_id, page):
 @login_required
 def like_post():
     post_id = int(request.args.get('id'))
+    # Nếu current user đã liked post
     if current_user.has_liked_post(post_id):
         current_user.unlike_post(post_id)
         db.session.commit()
+    # Nếu chưa liked post
     else:
         current_user.like_post(post_id)
         db.session.commit()
@@ -63,29 +78,24 @@ def like_post():
 @login_required
 def new_post():
     form = NewPostForm()
+    # Nếu đủ tham số
     if form.validate_on_submit():
-        f = form.photo.data
-        img_tag = ''
-        if f:
-            # Upload photo into cloudinary api
-            random_string = os.urandom(8).hex()
-            # Cloudinary config
-            cloudinary.config(
-                cloud_name=os.getenv('CLOUD_NAME'),
-                api_key=os.getenv('CLOUDINARY_API_KEY'),
-                api_secret=os.getenv('CLOUDINARY_API_SECRET')
-            )
-            print(os.getenv('CLOUD_NAME'), os.getenv('CLOUDINARY_API_KEY'), os.getenv('CLOUDINARY_API_SECRET'), sep='\n')
-            response = cloudinary.uploader.upload(f, folder='/hiiam')
-            url = response['url']
-            img_tag = f"<img src='{url}' loading='lazy'/>"
         today = datetime.now()
         title = form.title.data
-        content = form.content.data + img_tag
+        content = form.content.data
+        # If new post have an image.
+        if form.photo.data:
+            # Upload image into cloudinary api
+            response = cloudinary.uploader.upload(form.photo.data, folder='/hiiam')
+            url = response['url']
+            # Add to link to content
+            # Do lúc thiết kết database quên thêm thuộc tính image cho Post :(
+            content += f"<img src='{url}' loading='lazy'/>"
         new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         db.session.add(new_post_obj)
         db.session.commit()
         return redirect(url_for('home'))
+    # Nếu không đủ tham số
     return render_template('new-post.html', form=form)
 
 
@@ -93,6 +103,7 @@ def new_post():
 def sign_up():
     form = SignUpForm()
     if form.validate_on_submit():
+        # Hash password với salt để bảo mật
         salt = generate_password_hash(form.password.data, 'pbkdf2:sha256', salt_length=8)
         new_user = User(name=form.name.data, email=form.email.data, password=salt)
         db.session.add(new_user)
@@ -107,9 +118,11 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+        # Nếu email không tồn tại
         if user is None:
             flash("Email doesn't exit.")
             return render_template('login.html', form=form)
+        # Nếu pasword sai
         if not check_password_hash(user.password, form.password.data):
             flash("Password incorrect.")
             return render_template('login.html', form=form)
@@ -142,6 +155,7 @@ def send_comment(post_id):
         new_comment = Comment(date=now, content=form.content.data, user_id=current_user.id, post_id=post_id)
         db.session.add(new_comment)
         db.session.commit()
+        # Reset lại nút nhập comment
         form.content.data = ""
         return render_template('send-comment.html', form=form, post=post, display_time=display_time)
     return render_template('send-comment.html', form=form, post=post, display_time=display_time)
@@ -164,22 +178,23 @@ def like_comment():
 @login_required
 def delete_post(post_id):
     post_delete = Post.query.get(post_id)
-
+    # Nếu bài viết cần xóa không phải của người dùng hiện tại
     if current_user.id != post_delete.user.id:
         return redirect(url_for('home'))
-
     likes_of_post = LikedPost.query.filter_by(post_id=post_id)
+    # Xóa hết các likes của bài viết này trong LikedPost
     for like in likes_of_post:
         db.session.delete(like)
-
+    # Tìm tất cả các comments trong trong bài viết
     comments_of_post = Comment.query.filter_by(post_id=post_id)
-
     for comment in comments_of_post:
         likes_of_comment = LikedComment.query.filter_by(comment_id=comment.id)
+        # Xóa hết các like của comment
         for like in likes_of_comment:
             db.session.delete(like)
+        # Xóa comment
         db.session.delete(comment)
-
+    # Cuối cùng xóa bài viết
     db.session.delete(post_delete)
     db.session.commit()
     return redirect(url_for('home'))
@@ -188,31 +203,33 @@ def delete_post(post_id):
 @app.route('/user/profile/<int:user_id>')
 def get_profile(user_id):
     user = User.query.get(user_id)
-
     count_liked = 0
+    # Tính tổng các liked trong bài viết của user cần xem
     for post in user.posts:
         count_liked += post.post_likes.count()
-
     return render_template('profile.html', user=user, count_liked=count_liked)
 
 
 @app.route('/create-new-thread/<int:user_id>', methods=['GET'])
 @login_required
 def create_new_thread(user_id):
+    # Kiểm tra xem đã tạo Thread giữa current user với user này chưa
     thread_current_user = ThreadParticipant.query.filter_by(user_id=current_user.id)
     sq = ThreadParticipant.query.filter_by(user_id=user_id).subquery()
+    # Union 2 query
     result = thread_current_user.join(sq, ThreadParticipant.thread_id == sq.c.thread_id).first()
     if result:
-        return redirect(url_for('chat_page'))
+        return redirect(url_for('chat_page', thread_id=result.thread_id))
+    # Nếu chưa có thread
     new_thread = Thread()
     db.session.add(new_thread)
-    db.session.flush()
+    db.session.flush()  # để có id của new_thread
     new_participant_1 = ThreadParticipant(thread_id=new_thread.id, user_id=current_user.id)
     new_participant_2 = ThreadParticipant(thread_id=new_thread.id, user_id=user_id)
     db.session.add(new_participant_1)
     db.session.add(new_participant_2)
     db.session.commit()
-    return redirect(url_for('chat_page'))
+    return redirect(url_for('chat_page', thread_id=new_thread.id))
 
 
 @app.route('/chat')
@@ -222,18 +239,29 @@ def chat_page():
     threads = Thread.query.join(Thread.participants).filter_by(user_id=current_user.id)
     chat_thread_html = None
     thread = None
+    # Nếu có query thread
     if thread_id:
         thread = Thread.query.get(thread_id)
         user = None
+        thread_has_current_user = False
+        # Kiểm tra current user có tham gia thread này ko
         for participant in thread.participants:
             if participant.user.id != current_user.id:
                 user = participant.user
+            else:
+                thread_has_current_user = True
+        # Nếu chưa tham gia
+        if not thread_has_current_user:
+            return redirect(url_for('chat_page'))
+        # Lấy 10 tin nhắn mới nhất
         messages = thread.thread_messages.order_by(desc(Message.id)).paginate(page=1, per_page=10)
+        # Render phần chat thread
         chat_thread_html = render_template('chat-thread.html',
                                            thread=thread,
                                            messages=messages,
                                            user=user,
                                            reversed=reversed)
+    # Render phần tất cả các thread
     list_thread_template = render_template('list-thread.html',
                                            threads=threads,
                                            Message=Message,
@@ -248,17 +276,19 @@ def chat_page():
 
 @socketio.on('send-message')
 @login_required
-def handle_my_custom_event(data, methods=['GET', 'POST']):
+def handle_my_custom_event(data):
     user_send = User.query.get(int(data['user_id']))
+    # Tạo message mới rồi lưu vào database
     new_message = Message(
         thread_id=data['thread_id'],
         send_date=datetime.now(),
-        sending_user_id=data['user_id'],
+        sending_user_id=user_send.id,
         body=data['message']
     )
     db.session.add(new_message)
     db.session.commit()
-    json_response = {
+    # Tạo message gửi lại cho client
+    response_message = {
         'user_id': user_send.id,
         'html': render_template(
             'message.html',
@@ -269,7 +299,8 @@ def handle_my_custom_event(data, methods=['GET', 'POST']):
         'send_date': datetime.now().strftime('%d/%m/%Y, %I:%M %p'),
         'token': data['token'],
     }
-    emit('received-message', json_response, room=data['thread_id'])
+    # Gửi cho các client đang kết nối websocket với room user send
+    emit('received-message', response_message, room=data['thread_id'])
 
 
 @socketio.on('join')

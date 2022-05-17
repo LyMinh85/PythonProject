@@ -21,10 +21,10 @@
 </div>
 
 
-<div class="overflow-scroll px-3 pt-3" id="message_holder" data-mdb-perfect-scrollbar="true"
-     style="position: relative;height: 82vh;z-index: 1; bottom: 0;">
+<div class="overflow-scroll px-3 pt-3 d-flex flex-column-reverse" id="message_holder" data-mdb-perfect-scrollbar="true"
+     style="position: relative;height: 82vh;z-index: 1;">
 
-    {% for message in reversed(messages.items) %}
+    {% for message in messages.items %}
         {% if message.sending_user_id == current_user.id %}
             <div class="d-flex flex-row justify-content-end">
                 <div>
@@ -37,16 +37,20 @@
                         {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
                     </p>
                 </div>
+                <div>
+                    <img src="{{ current_user.email | gravatar }}"
+                         class="rounded-circle"
+                         alt="avatar 1" style="width: 30px; height: auto;">
+                </div>
 
-                <img src="{{ current_user.email | gravatar }}"
-                     class="rounded-circle"
-                     alt="avatar 1" style="width: 30px; height: 100%;">
             </div>
         {% else %}
             <div class="d-flex flex-row justify-content-start">
-                <img src="{{ message.user.email | gravatar }}"
-                     class="rounded-circle"
-                     alt="avatar 1" style="width: 30px; height: 100%;">
+                <div>
+                    <img src="{{ message.user.email | gravatar }}"
+                         class="rounded-circle"
+                         alt="avatar 1" style="width: 30px; height: auto;">
+                </div>
                 <div>
                     <p class="p-2 ms-3 me-5 mb-1 rounded-3"
                        style="background-color: #f5f6f7;">

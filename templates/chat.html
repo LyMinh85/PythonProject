@@ -56,64 +56,50 @@
 {% endblock %}
 
 {% block script %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-            integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-            crossorigin="anonymous"></script>
-    <script>
-        let message_holder = document.getElementById('message_holder');
-        const rand = function () {
-            return Math.random().toString(36).substr(2); // remove `0.`
-        };
+    {% if chat_thread_html %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+                integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+                crossorigin="anonymous"></script>
+        <script>
+            let message_holder = document.getElementById('message_holder');
+            const token = function () {
+                const rand = Math.random().toString(36).substr(2); // remove `0.`
+                return rand + rand; // to make it longer
+            };
 
-        const token = function () {
-            return rand() + rand(); // to make it longer
-        };
+            document.getElementById('message').addEventListener('keyup', event => {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById('button-send-message').click();
+                }
+            })
 
-        document.getElementById('message').addEventListener('keyup', event => {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                document.getElementById('button-send-message').click();
-            }
-        })
+            const socket = io();
+            socket.on('connect', () => {
+                joinThread({{ thread.id }});
 
-        if (message_holder.lastElementChild !== null) {
-            message_holder.lastElementChild.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
+                function joinThread(threadId) {
+                    socket.emit('join', {'room': threadId});
+                }
 
+                document.getElementById('thread-content').addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'BUTTON') return;
+                    const now = new Date();
+                    let message_target = $('#message');
+                    let user_input = message_target.val();
+                    const rand_token = token();
+                    socket.emit('send-message', {
+                        'user_id': {{ current_user.id }},
+                        'message': user_input,
+                        'send_date': now,
+                        'token': rand_token,
+                        'thread_id': parseInt(e.target.dataset.id),
+                        'room': parseInt(e.target.dataset.id)
+                    });
 
-        const socket = io();
-        socket.on('connect', function () {
-            let newThreadId = {{ thread.id }};
-            joinThread(newThreadId);
-
-            function leaveThread(threadId) {
-                socket.emit('leave', {'room': threadId});
-            }
-
-            function joinThread(threadId) {
-                socket.emit('join', {'room': threadId});
-            }
-
-            document.getElementById('thread-content').addEventListener('click', function (e) {
-                if (e.target.tagName !== 'BUTTON') return;
-                const now = new Date();
-                let message_target = $('#message');
-                let user_input = message_target.val();
-                const rand_token = token();
-                socket.emit('send-message', {
-                    'user_id': {{ current_user.id }},
-                    'message': user_input,
-                    'send_date': now,
-                    'token': rand_token,
-                    'thread_id': parseInt(e.target.dataset.id),
-                    'room': parseInt(e.target.dataset.id)
-                });
-
-                message_target.val('').focus();
-                message_holder.innerHTML +=
-                    `
+                    message_target.val('').focus();
+                    message_holder.innerHTML =
+                        `
                                     <div class="d-flex flex-row justify-content-end">
                                         <div>
                                             <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
@@ -126,29 +112,25 @@
                                                 id="${rand_token}">
                                             </p>
                                         </div>
-                                        <img src="{{ current_user.email | gravatar }}"
-                                             class="rounded-circle"
-                                             alt="avatar 1" style="width: 30px; height: 100%;">
-                                    </div>
-                    `;
-            });
-        })
-        socket.on('received-message', function (msg) {
-            if (msg.user_id === {{ current_user.id }}) {
-                document.getElementById(msg.token).innerHTML = msg.send_date;
-                document.getElementById(msg.token).scrollIntoView({
-                    behavior: 'smooth'
+                                        <div>
+                                            <img src="{{ current_user.email | gravatar }}"
+                                                 class="rounded-circle"
+                                                 alt="avatar 1" style="width: 30px; height: auto;">
+                                        </div>
+                                    </div>` + message_holder.innerHTML;
                 });
-            } else {
-                console.log(`User_id: ${msg.user_id} haa send message`);
-                message_holder.innerHTML += msg.html;
-                message_holder.lastElementChild.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
+            })
+            socket.on('received-message', (msg) => {
+                if (msg.user_id === {{ current_user.id }}) {
+                    const newMessageElement = document.getElementById(msg.token);
+                    newMessageElement.innerHTML += msg.send_date;
+                } else {
+                    console.log(`User_id: ${msg.user_id} haa send message`);
+                    message_holder.innerHTML = msg.html + message_holder.innerHTML;
+                }
+            })
 
-        })
-
-    </script>
+        </script>
+    {% endif %}
 {% endblock %}
 
