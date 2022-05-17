@@ -30,3 +30,4 @@ cloudinary~=1.29.0
 Flask-Minify==0.39
 Flask-SocketIO==5.1.2
 gevent-websocket==0.10.1
+gevent~=21.12.0
