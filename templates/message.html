@@ -1,19 +1,39 @@
-<div class="d-flex flex-row justify-content-start">
-    <div>
-        <img src="{{ user_send.email | gravatar }}"
-             class="rounded-circle"
-             alt="avatar 1" style="width: 30px; height: auto;">
+{% if user_send.id == current_user.id %}
+    <div class="d-flex flex-row justify-content-end">
+        <div>
+            <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
+                {{ message }}
+            </p>
+            <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+            </p>
+            <p class="small me-3 mb-3 rounded-3 text-muted position-absolute text-nowrap" style="right: 0;">
+                {{ send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+            </p>
+        </div>
+        <div>
+            <img src="{{ current_user.email | gravatar }}"
+                 class="rounded-circle"
+                 alt="avatar 1" style="width: 30px; height: auto;">
+        </div>
     </div>
-    <div>
-        <p class="p-2 ms-3 me-5 mb-1 rounded-3"
-           style="background-color: #f5f6f7;">
-            {{ message }}
-        </p>
-        <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
-        </p>
-        <p class="small ms-3 mb-3 rounded-3 text-muted float-start position-absolute text-nowrap"
-           style="left: 0;">
-            {{ send_date.strftime('%d/%m/%Y, %I:%M %p') }}
-        </p>
+{% else %}
+    <div class="d-flex flex-row justify-content-start">
+        <div>
+            <img src="{{ user_send.email | gravatar }}"
+                 class="rounded-circle"
+                 alt="avatar 1" style="width: 30px; height: auto;">
+        </div>
+        <div>
+            <p class="p-2 ms-3 me-5 mb-1 rounded-3"
+               style="background-color: #f5f6f7;">
+                {{ message }}
+            </p>
+            <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+            </p>
+            <p class="small ms-3 mb-3 rounded-3 text-muted float-start position-absolute text-nowrap"
+               style="left: 0;">
+                {{ send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+            </p>
+        </div>
     </div>
-</div>
+{% endif %}

@@ -91,6 +91,10 @@ img {
   top: 68px;
 }
 
+#list-thread li:hover {
+    background-color: #ebebeb;
+}
+
 .selected {
     background-color: #ebebeb;
 }

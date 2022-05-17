@@ -22,7 +22,7 @@
 
 
 <div class="overflow-scroll px-3 pt-3 d-flex flex-column-reverse" id="message_holder" data-mdb-perfect-scrollbar="true"
-     style="position: relative;height: 82vh;z-index: 1;">
+     style="position: relative; height: 75vh;">
 
     {% for message in messages.items %}
         {% if message.sending_user_id == current_user.id %}
@@ -61,6 +61,17 @@
                     <p class="small ms-3 mb-3 rounded-3 text-muted float-start position-absolute" style="left: 0;">
                         {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
                     </p>
+                </div>
+            </div>
+        {% endif %}
+        {% if loop.last %}
+            <div class="text-center">
+                <div hx-get="{{ url_for('get_message', thread_id=thread.id, page=2) }}"
+                     hx-trigger="click"
+                     hx-swap="outerHTML"
+                     hx-target="closest .text-center"
+                     class="btn btn-link w-25">
+                    More
                 </div>
             </div>
         {% endif %}

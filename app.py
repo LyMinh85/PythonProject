@@ -303,6 +303,17 @@ def handle_my_custom_event(data):
     emit('received-message', response_message, room=data['thread_id'])
 
 
+@app.route('/get-message/<int:thread_id>/<int:page>')
+@login_required
+def get_message(thread_id, page):
+    # Lấy 10 tin nhắn mới nhất ở trang thứ
+    thread = Thread.query.get(thread_id)
+    messages = None
+    if page != 0:
+        messages = thread.thread_messages.order_by(desc(Message.id)).paginate(page=page, per_page=10)
+    return render_template('get-messages.html', messages=messages, thread=thread)
+
+
 @socketio.on('join')
 @login_required
 def on_join(data):

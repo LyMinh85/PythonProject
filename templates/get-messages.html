@@ -1,0 +1,59 @@
+{% for message in messages.items %}
+    {% if message.user.id == current_user.id %}
+        <div class="d-flex flex-row justify-content-end">
+            <div>
+                <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
+                    {{ message.body }}
+                </p>
+                <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+                </p>
+                <p class="small me-3 mb-3 rounded-3 text-muted position-absolute text-nowrap" style="right: 0;">
+                    {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+                </p>
+            </div>
+            <div>
+                <img src="{{ current_user.email | gravatar }}"
+                     class="rounded-circle"
+                     alt="avatar 1" style="width: 30px; height: auto;">
+            </div>
+        </div>
+    {% else %}
+        <div class="d-flex flex-row justify-content-start">
+            <div>
+                <img src="{{ message.user.email | gravatar }}"
+                     class="rounded-circle"
+                     alt="avatar 1" style="width: 30px; height: auto;">
+            </div>
+            <div>
+                <p class="p-2 ms-3 me-5 mb-1 rounded-3"
+                   style="background-color: #f5f6f7;">
+                    {{ message.body }}
+                </p>
+                <p class="small mt-3 mb-3 rounded-3 text-muted float-end text-nowrap">
+                </p>
+                <p class="small ms-3 mb-3 rounded-3 text-muted float-start position-absolute text-nowrap"
+                   style="left: 0;">
+                    {{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if loop.last %}
+        {% if messages.has_next %}
+            {% set url_get_message = url_for('get_message', thread_id=thread.id, page=messages.next_num) %}
+        {% else %}
+            {% set url_get_message = url_for('get_message', thread_id=thread.id, page=0) %}
+        {% endif %}
+        <div class="text-center">
+            <div hx-get="{{ url_get_message }}"
+                 hx-trigger="click"
+                 hx-swap="outerHTML"
+                 hx-target="closest .text-center"
+                 class="btn btn-link w-25">
+                More
+            </div>
+        </div>
+    {% endif %}
+
+{% endfor %}

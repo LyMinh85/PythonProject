@@ -17,12 +17,12 @@
 
 
 {% block content %}
-    <div class="me-2 ms-2" style="min-height: 100vh;height:100vh;background-color: white;">
+    <div class="me-2 ms-2" style="background-color: white;">
 
-        <div class="row vh-100">
+        <div class="row">
             <div class="col-md-12">
 
-                <div class="card vh-100" id="chat3" style="border-radius: 15px;">
+                <div class="card" id="chat3" style="border-radius: 15px;">
                     <div class="card-body p-0">
 
                         <div class="row vh-100">
@@ -37,7 +37,8 @@
                                 </div>
                             {% endif %}
 
-                            <div class="col-md-6 col-lg-7 col-xl-8 ps-0 pe-0" id="thread-content">
+                            <div class="col-md-6 col-lg-7 col-xl-8 ps-0 pe-0" id="thread-content"
+                                 style="height: 100%;">
 
                                 {% if chat_thread_html %}
                                     {{ chat_thread_html | safe }}
