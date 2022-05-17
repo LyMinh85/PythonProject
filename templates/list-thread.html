@@ -89,7 +89,7 @@
 
                                 {% set message = thread.thread_messages.order_by(desc(Message.id)).first() %}
 
-                                <p class="small text-muted">
+                                <p class="small text-muted overflow-hidden">
                                     {% if message %}
                                         {{ message.body }}
                                     {% else %}
@@ -102,7 +102,7 @@
                             {% if message %}
                                 <p class="small text-muted mb-1">{{ message.send_date.strftime('%d/%m/%Y, %I:%M %p') }}</p>
                             {% endif %}
-                            <span class="badge bg-danger rounded-pill float-end">3</span>
+{#                            <span class="badge bg-danger rounded-pill float-end">3</span>#}
                         </div>
                     </a>
                 </li>

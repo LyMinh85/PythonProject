@@ -20,7 +20,7 @@ from models import Post, User, Comment, LikedComment, LikedPost, Thread, ThreadP
 # Các class Form
 from form import NewPostForm, SignUpForm, LoginForm, CommentForm
 
-
+# Cloudinary config
 cloudinary.config(
     cloud_name=os.environ.get('CLOUD_NAME'),
     api_key=os.environ.get('CLOUDINARY_API_KEY'),
@@ -73,30 +73,20 @@ def new_post():
     form = NewPostForm()
     if form.validate_on_submit():
         f = form.photo.data
-        file_path = ''
         img_tag = ''
         if f is not None:
-            filename = secure_filename(f.filename)
-            file_path = os.path.join(BASE_DIR, UPLOAD_FOLDER, filename)
-            print(file_path)
-            f.save(file_path)
-            img_tag = 'sad'
-        else:
-            img_tag = ""
-        today = datetime.now()
-        title = form.title.data
-        content = form.content.data
-        new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
-        if img_tag != "":
-            random_string = os.urandom(4).hex()
-            response = cloudinary.uploader.upload(file_path,
+            # Upload photo into cloudinary api
+            random_string = os.urandom(8).hex()
+            response = cloudinary.uploader.upload(f,
                                                   public_id=random_string,
                                                   folder='/hiiam', unique_filename=False
                                                   )
             url = response['url']
             img_tag = f"<img src='{url}' loading='lazy'/>"
-            new_post_obj.content += img_tag
-
+        today = datetime.now()
+        title = form.title.data
+        content = form.content.data + img_tag
+        new_post_obj = Post(title=title, content=content, user_id=current_user.get_id(), date=today)
         db.session.add(new_post_obj)
         db.session.commit()
         return redirect(url_for('home'))
