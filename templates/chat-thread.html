@@ -65,8 +65,13 @@
             </div>
         {% endif %}
         {% if loop.last %}
+            {% if messages.has_next %}
+                {% set url_get_message = url_for('get_message', thread_id=thread.id, page=messages.next_num) %}
+            {% else %}
+                {% set url_get_message = url_for('get_message', thread_id=thread.id, page=0) %}
+            {% endif %}
             <div class="text-center">
-                <div hx-get="{{ url_for('get_message', thread_id=thread.id, page=2) }}"
+                <div hx-get="{{ url_get_message }}"
                      hx-trigger="click"
                      hx-swap="outerHTML"
                      hx-target="closest .text-center"

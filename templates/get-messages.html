@@ -1,5 +1,5 @@
 {% for message in messages.items %}
-    {% if message.user.id == current_user.id %}
+    {% if message.sending_user_id == current_user.id %}
         <div class="d-flex flex-row justify-content-end">
             <div>
                 <p class="p-2 ms-5 me-3 mb-1 text-white rounded-3 bg-primary">
@@ -57,3 +57,9 @@
     {% endif %}
 
 {% endfor %}
+
+{% if not messages %}
+    <div class="text-center">
+        <p>Out of message</p>
+    </div>
+{% endif %}
