@@ -19,14 +19,9 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///post.db')
 DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-gravatar = Gravatar(app,
-                    size=100,
-                    rating='g',
-                    default='retro',
-                    force_default=False,
-                    force_lower=False,
-                    use_ssl=False,
-                    base_url=None)
+gravatar = Gravatar(app, size=100, rating='g', default='retro',
+                    force_default=False, force_lower=False,
+                    use_ssl=False, base_url=None)
 boostrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)

@@ -5,7 +5,6 @@ gevent.monkey.patch_all()
 from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc, subquery
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from flask_login import login_user, current_user, login_required, logout_user
 from datetime import datetime
 import cloudinary
@@ -56,9 +55,14 @@ def get_all_posts(user_id, page):
     if page != 0:
         # Lấy tất cả post
         if user_id == 0:
-            posts = Post.query.order_by(desc(Post.id)).paginate(page=page, per_page=5)
+            posts = Post.query.\
+                order_by(desc(Post.id)).\
+                paginate(page=page, per_page=5)
         else:  # Lấy tất cả post của user thuộc user_id
-            posts = Post.query.filter_by(user_id=user_id).order_by(desc(Post.id)).paginate(page=page, per_page=5)
+            posts = Post.query.\
+                filter_by(user_id=user_id).\
+                order_by(desc(Post.id)).\
+                paginate(page=page, per_page=5)
     return render_template("post-card.html", posts=posts, user_id=user_id, display_time=display_time)
 
 
