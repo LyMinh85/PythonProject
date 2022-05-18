@@ -84,7 +84,7 @@
                 }
 
                 document.getElementById('thread-content').addEventListener('click', (e) => {
-                    if (e.target.tagName !== 'BUTTON') return;
+                    if (e.target.id !== 'button-send-message') return;
                     const now = new Date();
                     let message_target = $('#message');
                     let user_input = message_target.val();
