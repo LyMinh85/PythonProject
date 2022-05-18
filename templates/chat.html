@@ -122,6 +122,8 @@
                 });
             })
             socket.on('received-message', (msg) => {
+                console.log({{ current_user.id }})
+                console.log(msg.html);
                 if (msg.user_id === {{ current_user.id }}) {
                     const newMessageElement = document.getElementById(msg.token);
                     newMessageElement.innerHTML += msg.send_date;
