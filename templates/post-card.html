@@ -1,109 +1,109 @@
 {% for post in posts.items %}
+    <div class="row">
+        <div class="col-md-12 grid-margin">
+            <div class="card rounded">
+                <div class="card-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
+                                <img class="img-xs rounded-circle"
+                                     src="{{ post.user.email | gravatar }}" alt="">
+                            </a>
+                            <div class="ms-2 d-flex">
+                                <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
+                                    <p class="text-dark fw-bold mb-0">{{ post.user.name }}</p>
+                                </a>
+                                <p class="tx-11 ms-2 mb-0 text-muted">{{ display_time(post.date) }}</p>
+                            </div>
+                        </div>
+                        {% if post.user.id == current_user.id %}
+                            <div class="dropdown">
+                                <a
+                                        class="text-reset me-3 dropdown-toggle hidden-arrow"
+                                        type="button"
+                                        id="dropdownMenuButton"
+                                        data-mdb-toggle="dropdown"
+                                        aria-expanded="false"
+                                >
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           href="{{ url_for('delete_post', post_id=post.id) }}">
+                                            <span class="fa-solid fa-trash"></span>
+                                            Delete
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('get_post', post_id=post.id) }}">
+                        <h4 class="mb-3">{{ post.title }}</h4>
+                    </a>
+                    <div class="mb-3 tx-14">{{ post.content | safe }}</div>
+                </div>
+                <div class="card-footer">
+                    <ul class="list-unstyled d-flex justify-content-between mb-0 pe-xl-5">
+                        <li>
+                            {% if current_user.is_authenticated %}
+                                <a type="button"
+                                   hx-get="{{ url_for('like_post', id=post.id) }}"
+                                   data-id='{{ post.id }}'
+                                        {% if current_user.has_liked_post(post.id) %}
+                                   class="fa-solid fa-heart fa-xl text-dark text-decoration-none"
+                                   data-action="unliked"
+                                        {% else %}
+                                   class="fa-regular fa-heart fa-xl text-dark text-decoration-none"
+                                   data-action="like"
+                                        {% endif %}
+                                ></a>
+                            {% else %}
+                                <a type="button"
+                                   href="{{ url_for('login') }}"
+                                   class="fa-regular fa-heart fa-xl text-dark text-decoration-none"
+                                ></a>
+                            {% endif %}
+                            <span class="mt-3 p-2">{{ post.post_likes.count() }}</span>
+                        </li>
+                        <li>
+                            <a type="button"
+                               href="{{ url_for('get_post', post_id=post.id, _anchor='comment') }}"
+                               class="fa-regular fa-comment fa-xl text-dark text-decoration-none"
+                            ></a>
+                            <span class="mt-3 p-2">{{ post.comments.count() }}</span>
+                        </li>
+                        <li>
+                            <a type="button"
+                               href="javascript:"
+                               class="fa-solid fa-link fa-xl text-dark text-decoration-none"
+                               data-bs-toggle="modal"
+                               data-bs-target="#copiedModal"
+                               data-action="copy-link"
+                               data-link="{{ url_for('get_post', post_id=post.id) }}"
+                            ></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if loop.last %}
         {% if posts.has_next %}
             {% set get_url = url_for('get_all_posts', user_id=user_id, page=posts.next_num) %}
         {% else %}
             {% set get_url = url_for('get_all_posts', user_id=user_id, page=0) %}
         {% endif %}
-        <div class="row"
-             hx-get="{{ get_url }}"
+        <div hx-get="{{ get_url }}"
              hx-trigger="revealed"
-             hx-swap="afterend"
-        >
-    {% else %}
-        <div class="row">
+             hx-swap="outerHTML">
+            <i class="fa-solid fa-spinner fa-spin-pulse"></i>
+        </div>
     {% endif %}
-<div class="col-md-12 grid-margin">
-    <div class="card rounded">
-        <div class="card-header">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
-                        <img class="img-xs rounded-circle"
-                             src="{{ post.user.email | gravatar }}" alt="">
-                    </a>
-                    <div class="ms-2 d-flex">
-                        <a href="{{ url_for('get_profile', user_id=post.user.id) }}">
-                            <p class="text-dark fw-bold mb-0">{{ post.user.name }}</p>
-                        </a>
-                        <p class="tx-11 ms-2 mb-0 text-muted">{{ display_time(post.date) }}</p>
-                    </div>
-                </div>
-                {% if post.user.id == current_user.id %}
-                    <div class="dropdown">
-                        <a
-                                class="text-reset me-3 dropdown-toggle hidden-arrow"
-                                type="button"
-                                id="dropdownMenuButton"
-                                data-mdb-toggle="dropdown"
-                                aria-expanded="false"
-                        >
-                            <i class="fa-solid fa-ellipsis"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                            <li>
-                                <a class="dropdown-item text-danger"
-                                   href="{{ url_for('delete_post', post_id=post.id) }}">
-                                    <span class="fa-solid fa-trash"></span>
-                                    Delete
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="card-body">
-            <a href="{{ url_for('get_post', post_id=post.id) }}">
-                <h4 class="mb-3">{{ post.title }}</h4>
-            </a>
-            <div class="mb-3 tx-14">{{ post.content | safe }}</div>
-        </div>
-        <div class="card-footer">
-            <ul class="list-unstyled d-flex justify-content-between mb-0 pe-xl-5">
-                <li>
-                    {% if current_user.is_authenticated %}
-                        <a type="button"
-                           hx-get="{{ url_for('like_post', id=post.id) }}"
-                           data-id='{{ post.id }}'
-                                {% if current_user.has_liked_post(post.id) %}
-                           class="fa-solid fa-heart fa-xl text-dark text-decoration-none"
-                           data-action="unliked"
-                                {% else %}
-                           class="fa-regular fa-heart fa-xl text-dark text-decoration-none"
-                           data-action="like"
-                                {% endif %}
-                        ></a>
-                    {% else %}
-                        <a type="button"
-                           href="{{ url_for('login') }}"
-                           class="fa-regular fa-heart fa-xl text-dark text-decoration-none"
-                        ></a>
-                    {% endif %}
-                    <span class="mt-3 p-2">{{ post.post_likes.count() }}</span>
-                </li>
-                <li>
-                    <a type="button"
-                       href="{{ url_for('get_post', post_id=post.id, _anchor='comment') }}"
-                       class="fa-regular fa-comment fa-xl text-dark text-decoration-none"
-                    ></a>
-                    <span class="mt-3 p-2">{{ post.comments.count() }}</span>
-                </li>
-                <li>
-                    <a type="button"
-                       href="javascript:"
-                       class="fa-solid fa-link fa-xl text-dark text-decoration-none"
-                       data-bs-toggle="modal"
-                       data-bs-target="#copiedModal"
-                       data-action="copy-link"
-                       data-link="{{ url_for('get_post', post_id=post.id) }}"
-                    ></a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-</div>
 
 {% endfor %}
 {% if not posts %}

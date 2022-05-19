@@ -1,7 +1,7 @@
 # Các thư viện
 # at the beginning of the script
-import gevent.monkey
-gevent.monkey.patch_all()
+# import gevent.monkey
+# gevent.monkey.patch_all()
 from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc, subquery
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -85,13 +85,11 @@ def like_post():
 @login_required
 def new_post():
     form = NewPostForm()
-    # Nếu đủ tham số
-    if form.validate_on_submit():
+    if form.validate_on_submit(): # Nếu đủ tham số
         today = datetime.now()
         title = form.title.data
         content = form.content.data
-        # If new post have an image.
-        if form.photo.data:
+        if form.photo.data: # If new post have an image.
             # Upload image into cloudinary api
             response = cloudinary.uploader.upload(form.photo.data, folder='/hiiam')
             url = response['url']
@@ -102,7 +100,6 @@ def new_post():
         db.session.add(new_post_obj)
         db.session.commit()
         return redirect(url_for('home'))
-    # Nếu không đủ tham số
     return render_template('new-post.html', form=form)
 
 
@@ -199,8 +196,7 @@ def delete_post(post_id):
         # Xóa hết các like của comment
         for like in likes_of_comment:
             db.session.delete(like)
-        # Xóa comment
-        db.session.delete(comment)
+        db.session.delete(comment) # Xóa comment
     # Cuối cùng xóa bài viết
     db.session.delete(post_delete)
     db.session.commit()

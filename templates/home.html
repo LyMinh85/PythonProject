@@ -23,7 +23,9 @@
 
                     <div hx-get="{{ url_for('get_all_posts', user_id=0, page=1) }}"
                          hx-trigger="revealed"
-                         hx-swap="afterend"></div>
+                         hx-swap="outerHTML">
+                        <i class="fa-solid fa-spinner fa-spin-pulse"></i>
+                    </div>
 
                 </div>
                 <!-- middle wrapper end -->
