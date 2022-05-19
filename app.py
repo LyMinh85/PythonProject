@@ -1,7 +1,7 @@
 # Các thư viện
 # at the beginning of the script
-# import gevent.monkey
-# gevent.monkey.patch_all()
+import gevent.monkey
+gevent.monkey.patch_all()
 from flask import render_template, request, redirect, url_for, flash
 from sqlalchemy import desc, subquery
 from werkzeug.security import generate_password_hash, check_password_hash
