@@ -40,6 +40,7 @@
     {% endif %}
 
     {% if loop.last %}
+        {# Nếu có trang kế tiếp  #}
         {% if messages.has_next %}
             {% set url_get_message = url_for('get_message', thread_id=thread.id, page=messages.next_num) %}
         {% else %}
